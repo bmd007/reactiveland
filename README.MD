@@ -4,6 +4,10 @@
 Where we go through journey from reactive programming to reactive systems.
 Our journey will happen through a series of short lecture (youtube) followed by an educational programming challenge.
 
+### Who?
+ - If you have an overall knowledge about reactive programming but never tried it before.
+ - If you have tried reactive programming but it never worked
+
 ### Requirements:
  - Decent Java programming skills (Java 17 preferably)
  - Reading [Reactive manifesto](https://www.reactivemanifesto.org)

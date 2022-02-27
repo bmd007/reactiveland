@@ -1,4 +1,4 @@
-package reactiveland.season1.basics;
+package reactiveland.season1;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
