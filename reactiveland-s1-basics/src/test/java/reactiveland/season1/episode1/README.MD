@@ -1,32 +1,22 @@
 # Just a box!
 ## [Lecture](http://youtube.com/mm7amini/reactiveland/season1/episode1)
 
-### New paradigms:
+#
 
 #### River, pipeline, tap
-   - ![bleiksa river iceland](bleiksa-river-waterfall-iceland.jpeg)
+![bleiksa river iceland](bleiksa-river-waterfall-iceland.jpeg)
 
 #### Declarative vs imperative
-    Declerative: 
-      Mono.just("number: 12")
-        .map(text -> text.split(":")[1])
-        .map(String::trim)
-        .map(Interger::valueOf)
-        .filter(number -> number % 2 == 0)
-        .subscribe(evenNumber -> print(number + " is even");
-
+    Optional.ofNullable(findXById("some id"))
+        .orElseGet( () -> new X())
     -------------------------
-    Imperative:
-    String text = "number 12";
-    String numberWithoutSpace = text.split(":").trim();
-    Integer number = Integer.valueOf(numberWithoutSpace);
-    If(number % 2 == 0){
-        print(number + " is even")
+    if(findXById("some id") == null){
+        return new X()
     }
     
-### Blocking vs nonblocking (and optional)
+### Blocking vs nonblocking
     public X findById(String id){
-        return dbConnection.query(....)
+        return jdbcConnection.query(....)
     }
     
     X x = Optional.nullable(findXById("some id"))
@@ -43,16 +33,25 @@ You have a box, you wait until you know if `findById` can put something in it or
 You have a box, `findById` might at some point put ONE thing in it. 
 
 ### just()
+    Mono<T> mono = Mono.just(new T());
 
 ### subscribe()
-    XMono.subscribe(x -> );
+    Mono<T> mono = Mono.just(new T());
+    mono.subscribe(t -> );
 
 ![pipe tap](pipe-tap.jpeg)
 
 ### block()
+    Mono<T> mono = ...;
+    T t = mono.block();
 
 ### StepVerifier
-
+    Mono<T> mono = ...;
+    StepVerifier.create(mono)
+        .expectNext()
+        .assertNext(next -> )
+        .expectComplete()
+        .verify()
 
 [//]: # ( - Chaos vs order)
 [//]: # ( - River)

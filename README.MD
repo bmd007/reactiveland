@@ -19,9 +19,7 @@ Our journey will happen through a series of short lecture (youtube) followed by 
    - In each episode, after the lecture, we will work on one programming challenge.
    When you solved one (in your group or alone), feel free to create a PR.
    If your answer is different from what has already merged, it will be merged.
-   - Master branch, will contain up to the latest challenge and answer to the previous ones.
-   During each workshop, you should create a branch with a name identifying your group.
-   When done, create a PR using that branch.
+   
    
 
 ### How to use: Use the links below to move to the corresponding directory to each episode.
