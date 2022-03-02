@@ -11,8 +11,10 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 ### Requirements:
  - Decent Java programming skills (Java 17 preferably)
  - Reading [Reactive manifesto](https://www.reactivemanifesto.org)
- - Understanding [projectreactor](https://projectreactor.io/) and how it's useful 
- - Understanding [Webflux](https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html) and how it's useful
+ 
+### Reading suggestions:
+ - [projectreactor](https://projectreactor.io/) 
+ - Overall Understanding [Webflux](https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html)
 
 ### Rules of engagement:
  - PR for adding more tests and examples to each session.
