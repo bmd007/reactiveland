@@ -3,9 +3,6 @@
 
 #
 
-#### River, pipeline, tap
-![bleiksa river iceland](bleiksa-river-waterfall-iceland.jpeg)
-
 #### Declarative vs imperative
     Optional.ofNullable(findXById("some id"))
         .orElseGet( () -> new X())
@@ -52,9 +49,3 @@ You have a box, `findById` might at some point put ONE thing in it.
         .assertNext(next -> )
         .expectComplete()
         .verify()
-
-[//]: # ( - Chaos vs order)
-[//]: # ( - River)
-[//]: # ( - Stream)
-[//]: # (functional programming, pure functions, only one thing)
-[//]: # (Optional, Collection, Exception, null <--> Mono, Flux, Error, Empty)

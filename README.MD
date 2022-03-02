@@ -31,3 +31,5 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 
 ## Season 1: Reactive programming basics
 ### Episode 1: [Just a box!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode1)
+### Episode 2: [# Garbage Dry Fish!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode2)
+
