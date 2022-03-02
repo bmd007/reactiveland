@@ -1,5 +1,5 @@
 # GarbageDryFish!
-## [Lecture](http://youtube.com/mm7amini/reactiveland/season1/episode1)
+## [Lecture](http://youtube.com/mm7amini/reactiveland/season1/episode2) todo
 
 #
 
