@@ -1,7 +1,7 @@
 # REACTIVELAND
 
 ## Welcome to Reactiveland,
-Where we go through journey from reactive programming to reactive systems.
+Where we go through a journey from reactive programming to reactive systems.
 Our journey will happen through a series of short lecture (youtube) followed by an educational programming challenge.
 
 ### Who?
