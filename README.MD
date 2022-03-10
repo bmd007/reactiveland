@@ -14,7 +14,7 @@ Our journey will happen through a series of short lecture (youtube) followed by 
  
 ### Reading suggestions:
  - [projectreactor](https://projectreactor.io/) 
- - Overall Understanding [Webflux](https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html)
+ - Overall Understanding of [Webflux](https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html)
 
 ### Rules of engagement:
  - PR for adding more tests and examples to each session.
