@@ -16,7 +16,7 @@ Our journey will happen through a series of short lecture (youtube) followed by 
  - [projectreactor](https://projectreactor.io/) 
  - Overall Understanding of [Webflux](https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html)
  - Josh Long book: [reactive-spring](https://leanpub.com/reactive-spring)
-
+ - watch [video from spring](https://youtu.be/IZ2SoXUiS7M)
 ### Rules of engagement:
  - PR for adding more tests and examples to each session.
    - In each episode, after the lecture, we will work on one programming challenge.
