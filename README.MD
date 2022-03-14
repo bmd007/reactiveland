@@ -19,10 +19,10 @@ Our journey will happen through a series of short lecture (youtube) followed by 
  - watch [video from spring](https://youtu.be/IZ2SoXUiS7M)
 ### Rules of engagement:
  - PR for adding more tests and examples to each session.
-   - In each episode, after the lecture, we will work on one programming challenge.
+   - In each episode, after the lecture, we will work on some programming challenges.
    When you solved one (in your group or alone), feel free to create a PR.
    If your answer is different from what has already merged, it will be merged.
-   - Master branch, will contain up to the challenges and their solution answer.
+   - Master branch (called `main`), will contain challenges and their solution answer.
    - There is a separate branch called `challenges` which will contain challenges only (no solutions)
    During each workshop, you should create a branch with a name identifying your group.
    When done, create a PR using that branch toward master.
