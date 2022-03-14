@@ -23,7 +23,7 @@ Our journey will happen through a series of short lecture (youtube) followed by 
    When you solved one (in your group or alone), feel free to create a PR.
    If your answer is different from what has already merged, it will be merged.
    - Master branch (called `main`), will contain challenges and their solution answer.
-   - There is a separate branch called `challenges` which will contain challenges only (no solutions)
+   - If you want challenges without responses, you can check out the commit id in front of each episode added below.
    During each workshop, you should create a branch with a name identifying your group.
    When done, create a PR using that branch toward master.
    
@@ -32,5 +32,7 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 
 ## Season 1: Reactive programming basics
 ### Episode 1: [Just a box!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode1)
+   Challenges commit id: `7cd7970042afa5fbb64814494f29808a225cb446`
+
 ### Episode 2: [# Garbage Dry Fish!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode2)
 
