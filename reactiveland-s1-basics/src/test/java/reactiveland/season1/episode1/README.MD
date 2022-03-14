@@ -45,7 +45,6 @@ You have a box, `findById` might at some point put ONE thing in it.
 ### StepVerifier
     Mono<T> mono = ...;
     StepVerifier.create(mono)
-        .expectNext()
-        .assertNext(next -> )
+        .assertNext(next -> assertEquals(expected, next))
         .expectComplete()
         .verify()
