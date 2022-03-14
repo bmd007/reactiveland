@@ -32,7 +32,8 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 
 ## Season 1: Reactive programming basics
 ### Episode 1: [Just a box!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode1)
-   Challenges commit id: `7cd7970042afa5fbb64814494f29808a225cb446`
+##### Challenges commit id: `7cd7970042afa5fbb64814494f29808a225cb446`
+##### [Lecture](https://youtu.be/vo9MmVlVyQM) 
 
 ### Episode 2: [# Garbage Dry Fish!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode2)
 

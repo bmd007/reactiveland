@@ -1,7 +1,5 @@
 # Just a box!
-## [Lecture](http://youtube.com/mm7amini/reactiveland/season1/episode1) todo
 
-#
 
 #### Declarative vs imperative
     Optional.ofNullable(findXById("some id"))
