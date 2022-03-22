@@ -6,6 +6,10 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.NoSuchElementException;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 class GarbageDryFish {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(GarbageDryFish.class);
@@ -17,12 +21,22 @@ class GarbageDryFish {
         //given
         var bugattiChiron = new Car("Bugatti Chiron", "381");
         //when
-//        Mono<Double> actualMaxSpeedMono = ;//todo
-//        //then
-//        StepVerifier.create(actualMaxSpeedMono)
-//                .assertNext(maxSpeedInMPS -> maxSpeedInMPS.equals(105.833))
-//                .expectComplete()
-//                .verify();
+        Mono<Long> actualMaxSpeedMono = Mono.just(bugattiChiron)
+                .map(Car::maxSpeedInKMH)
+                .map(Double::valueOf)
+                .map(KMHSpeed -> KMHSpeed/3.6)
+                .map(Math::round);
+        //then
+        StepVerifier.create(actualMaxSpeedMono)
+                .assertNext(maxSpeedInMPS -> assertEquals(106, maxSpeedInMPS))
+                .expectComplete()
+                .verify();
+    }
+
+    private class CarException extends Exception {
+        public CarException(String message) {
+            super(message);
+        }
     }
 
     @Test
@@ -34,12 +48,12 @@ class GarbageDryFish {
                 .map(Car::maxSpeedInKMH)
                 .map(Integer::valueOf)
                 .map(speed -> speed / 3.6)
-                .doOnError(error -> LOGGER.error("error before transformation", error))
-                //todo
-                ;
+                .doOnError(error -> LOGGER.error("error", error))
+                .onErrorMap(error -> new CarException("wrong car speed"));
         //then
         StepVerifier.create(maxSpeedMono)
-                .expectError(IllegalArgumentException.class)
+                .expectErrorMatches(throwable -> throwable.getMessage().equals("wrong car speed") &&
+                        throwable.getClass().equals(CarException.class))
                 .verify();
     }
 }

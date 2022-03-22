@@ -1,5 +1,5 @@
 # GarbageDryFish!
-## [Lecture](http://youtube.com/mm7amini/reactiveland/season1/episode2) todo
+## [Lecture](https://youtu.be/qzBCElYrkdo)
 
 #
 
@@ -45,7 +45,15 @@ do something asynchronously where an error happens in the stream
 
 map current error in the stream into another one 
 
-[//]: # (Stream)
+### expectErrorMatches
+    Mono<X> errorMono = mono containing error.
+        
+    StepVerifier.create(errorMono)
+                .expectErrorMatches(throwable -> false/true)
+                .verify();
+
+asserting the error in the mono  
+
 [//]: # (if eles filter empty)
 [//]: # (doOnNext, Collection, Flux, filter, recursive <--> while)
-[//]: # (functional programming, pure functions, only one thing)
+[//]: # (pure functions)
