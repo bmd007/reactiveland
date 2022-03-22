@@ -1,7 +1,4 @@
 # GarbageDryFish!
-## [Lecture](https://youtu.be/qzBCElYrkdo)
-
-#
 
 #### River, pipeline, tap
 ![bleiksa river iceland](bleiksa-river-waterfall-iceland.jpeg)

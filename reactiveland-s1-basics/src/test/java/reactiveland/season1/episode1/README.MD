@@ -1,6 +1,5 @@
 # Just a box!
 
-
 #### Declarative vs imperative
     Optional.ofNullable(findXById("some id"))
         .orElseGet( () -> new X())
