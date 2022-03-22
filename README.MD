@@ -36,4 +36,5 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 ##### [Lecture](https://youtu.be/vo9MmVlVyQM) 
 
 ### Episode 2: [# Garbage Dry Fish!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode2)
+##### Challenges commit id: `a6bbc988592690020747a81a4014bba47dd679e9`
 ##### [Lecture](https://youtu.be/qzBCElYrkdo)
