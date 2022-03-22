@@ -11,22 +11,17 @@
     
     try(){}catch(Exception e){}
      
-    x = "something long" 
-    y = x.length
-    z = x ˆ 10
-    f = (z % 2 == 2) 
-    if (f){
-        print(z) 
-    }
-
-    -------------------------
-    Empty (signal): DRY
+    x = "something long".length()
+    y = x ˆ 10
     
-    Error (signal): GARBAGE
+    -------------------------
+    Empty (empty signal): DRY
+    
+    Error (error signal): GARBAGE
 
-    x: fish
-    map(x -> )
-
+    map(x -> y = x ^ 10)
+    x (next signal): FISH
+  
     
 ### Map
     Mono<?> = Mono.just("a legnthy string)
