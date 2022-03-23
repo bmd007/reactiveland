@@ -28,7 +28,7 @@
     Mono<X> xMono = ........
         .defaultIfEmpty(new X);     
     
-whenever the mono is empty, the value inside defaultIfEmpty will be used. 
+Whenever the mono is empty, the value inside defaultIfEmpty will be used. 
 That value should have the same type as the last part of the stream.
 It's similar to optional.orElse()
 
