@@ -54,6 +54,17 @@ class FishingNet {
     }
 
     @Test
+    void notFoundExceptionWhenNoBigEnoughFreshFish(){
+        //given
+        var fish = new Fish("bought today", 8, LocalDateTime.now().minusDays(5L));
+        //when
+            Mono.just(fish);//todo
+        //then
+        //todo
+
+    }
+
+    @Test
     void catchFishIfNoBigEnoughFreshFish(){
         //given
         var fish = new Fish("bought today", 8, LocalDateTime.now().minusDays(5L));
