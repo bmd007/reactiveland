@@ -6,8 +6,6 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.NoSuchElementException;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class GarbageDryFish {
@@ -40,7 +38,7 @@ class GarbageDryFish {
     }
 
     @Test
-    void illegalAccessExceptionWhenInvalidMaxSpeed(){
+    void carExceptionWhenInvalidMaxSpeed() {
         //given
         var bugattiChiron = new Car("Bugatti Chiron", "380 and something");
         //when turning speed from KPH to MPS

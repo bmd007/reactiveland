@@ -21,7 +21,7 @@
   
     
 ### Map
-    Mono<?> = Mono.just("a legnthy string)
+    Mono<?> = Mono.just("a legnthy string")
         .map(string -> string.length)
         .map(stringLength -> ?   )
 
