@@ -49,8 +49,4 @@ map current error in the stream into another one
                 .expectErrorMatches(throwable -> false/true)
                 .verify();
 
-asserting the error in the mono  
-
-[//]: # (if eles filter empty)
-[//]: # (doOnNext, Collection, Flux, filter, recursive <--> while)
-[//]: # (pure functions)
+asserting the error in the mono
