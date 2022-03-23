@@ -42,9 +42,7 @@ class WaterAndElectricity {
     @Test
     void prepareADishAndNotifyTheHungryGuy(){
         //when
-        Mono<Food> dishMono = catchAFish()
-                .flatMap(this::cookADish)
-                .doOnNext(food -> notifier.notifyHungry(food.name)); //todo;
+        Mono<Food> dishMono = null;//todo
         //then
         StepVerifier.create(dishMono)
                 .assertNext(dish -> assertEquals(8, dish.fish.size))
