@@ -43,3 +43,9 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 ##### Challenges commit id: `todo`
 ##### [Lecture]()todo
 
+### Episode 4: [# Water and electricity!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode4)
+##### Challenges commit id: `todo`
+##### [Lecture]()todo
+
+
+

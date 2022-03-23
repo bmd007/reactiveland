@@ -1,6 +1,6 @@
 # Fishing Net!
 
-![bleiksa river iceland](Fishing_net.jpeg)
+![Fishing Net](Fishing_net.jpeg)
 
 #### Declarative vs imperative
     Integer number = 124;

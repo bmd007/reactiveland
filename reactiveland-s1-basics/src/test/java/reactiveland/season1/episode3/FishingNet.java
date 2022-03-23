@@ -17,7 +17,7 @@ class FishingNet {
         //given
         int number = 44;
         //when
-        Mono<Integer> oddNumberOnlyMono = Mono.just(number)//todo
+        Mono<Integer> oddNumberOnlyMono = Mono.just(number);//todo
 
         //then
         //todo
@@ -47,7 +47,7 @@ class FishingNet {
         var frozenFish = new Fish("frozen fish", 10, LocalDateTime.now().minusMonths(1L));
         var freshFish = new Fish("caught today", 4, LocalDateTime.now().minusHours(2L));
         //when
-            Mono.just(freshFish)//todo
+            Mono.just(freshFish);//todo
         //then
         // todo
 
@@ -58,7 +58,7 @@ class FishingNet {
         //given
         var fish = new Fish("bought today", 8, LocalDateTime.now().minusDays(5L));
         //when
-            Mono.just(fish)//todo
+            Mono.just(fish);//todo
         //then
         //todo
 
