@@ -62,8 +62,19 @@ class FishingNet {
         //then
         //todo
 
-
     }
 
+    @Test
+    void nullIsNotEmptyButIsError(){
+        //when
+        Mono mono = Mono.<Integer>just(2)
+                .map(a -> null)
+                .defaultIfEmpty(3);
+        //then
+        //todo
+        StepVerifier.create(mono)
+                .expectComplete()
+                .verify();
+    }
 
 }
