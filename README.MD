@@ -1,4 +1,4 @@
-# REACTIVELAND
+# REACTIVE LAND
 
 ## Welcome to Reactiveland,
 Where we go through a journey from reactive programming to reactive systems.
@@ -42,10 +42,10 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 ### Episode 3: [# Fishing Net!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode3)
 ##### Challenges commit id: `2129a27c309e99bec15aba816aa9005a3e4dc231`
 ##### [Lecture video](https://www.youtube.com/watch?v=PEESaoM0zdg&ab_channel=Reactiveland)
-##### [Challenge 1 video](https://www.youtube.com/watch?v=PEESaoM0zdg&ab_channel=Reactiveland)
-##### [Challenge 2 video](https://www.youtube.com/watch?v=PEESaoM0zdg&ab_channel=Reactiveland)
-##### [Challenge 3 video](https://www.youtube.com/watch?v=PEESaoM0zdg&ab_channel=Reactiveland)
-##### [Challenge 4 and 5 video](https://www.youtube.com/watch?v=PEESaoM0zdg&ab_channel=Reactiveland)
+##### [Challenge 1 video](https://youtu.be/Zpk1IhGhQ2s)
+##### [Challenge 2 video](https://youtu.be/H3ESz6q3rZI)
+##### [Challenge 3 video](https://youtu.be/71C1NmRWhik)
+##### [Challenge 4 and 5 video](https://youtu.be/w4jKuqexnTo)
 
 ### Episode 4: [# Water and electricity!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode4)
 ##### Challenges commit id: `todo`
