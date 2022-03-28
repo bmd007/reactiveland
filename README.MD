@@ -40,7 +40,7 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 ##### [Lecture](https://youtu.be/qzBCElYrkdo)
 
 ### Episode 3: [# Fishing Net!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode3)
-##### Challenges commit id: `todo`
+##### Challenges commit id: `2129a27c309e99bec15aba816aa9005a3e4dc231`
 ##### [Lecture]()todo
 
 ### Episode 4: [# Water and electricity!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode4)
