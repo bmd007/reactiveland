@@ -48,8 +48,9 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 ##### [Challenge 4 and 5 video](https://youtu.be/w4jKuqexnTo)
 
 ### Episode 4: [# Water and electricity!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode4)
-##### Challenges commit id: `todo`
-##### [Lecture video]()todo
+##### Challenges commit id: `1806dac211f670a90a6bd51d4c75a223943e9f12`
+##### [Lecture video](https://youtu.be/BbNs4VglFeo)
+##### [Challenge 1 video](https://youtu.be/MDKLk_TjS1Y)
 
 
 

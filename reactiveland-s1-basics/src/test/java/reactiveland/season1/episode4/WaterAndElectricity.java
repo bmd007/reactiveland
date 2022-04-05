@@ -13,6 +13,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -42,13 +43,15 @@ class WaterAndElectricity {
     @Test
     void prepareADishAndNotifyTheHungryGuy(){
         //when
-        Mono<Food> dishMono = null;//todo
+        Mono<Food> dishMono = catchAFish()
+                .flatMap(this::cookADish)
+                .doOnNext(food -> notifier.notifyHungry(food.name()));
         //then
         StepVerifier.create(dishMono)
                 .assertNext(dish -> assertEquals(8, dish.fish.size))
                 .expectComplete()
                 .verify();
-        verify(hungryGuy, times(1)).getFood("seafood");
+        verify(hungryGuy, timeout(3)).getFood("seafood");
     }
 
 }
