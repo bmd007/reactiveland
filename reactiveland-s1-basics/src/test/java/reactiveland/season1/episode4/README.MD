@@ -34,7 +34,3 @@ Which is not desirable. Instead we flatten the flow into Mono<X> using flatMap.
 to do something asynchronously off the main execution flow, use doOnNext. 
 Operations defined in doOnNext won't affect the main flow.
 
-[//]: # (Collection, Flux, filter, recursive <--> while)
-[//]: # (pure functions)
-[//]: # (....,webClient, download uptown funk, play up town funk)
-

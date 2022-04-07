@@ -52,5 +52,10 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 ##### [Lecture video](https://youtu.be/BbNs4VglFeo)
 ##### [Challenge 1 video](https://youtu.be/MDKLk_TjS1Y)
 
+### Episode 5: [#  More than one fish!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode5)
+##### Challenges commit id: ``
+##### [Lecture video]()todo
+##### [Challenge 1 video]()todo
+
 
 

@@ -47,7 +47,3 @@ The type of default mono should be similar to the type of last part of the strea
     Mono<String> xMono = ........
         .map(x -> x.toString())
         .switchIfEmpty(Mono<String>);
-
-[//]: # (doOnNext, flatMap)
-[//]: # (doOnNext, flatMap, Collection, Flux, filter, recursive <--> while)
-[//]: # (pure functions)
