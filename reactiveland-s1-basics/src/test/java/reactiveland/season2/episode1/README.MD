@@ -62,8 +62,8 @@ StepVerifier is still useful here.
         .expectComplete()
         .verify();
 
-[//]: # (webflux)
 [//]: # (webTestClient)
+[//]: # (webflux)
 [//]: # (hot publisher vs cold publisher https://projectreactor.io/docs/core/release/reference/#reactor.hotCold)
 [//]: # (defer vs just)
 [//]: # (pure functions and side effects)
