@@ -64,5 +64,7 @@ StepVerifier is still useful here.
 
 [//]: # (webflux)
 [//]: # (webTestClient)
+[//]: # (hot publisher vs cold publisher https://projectreactor.io/docs/core/release/reference/#reactor.hotCold)
+[//]: # (defer vs just)
 [//]: # (pure functions and side effects)
 
