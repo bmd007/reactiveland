@@ -7,6 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Season1Application {
 
 	public static void main(String[] args) {
+
+		Schedulers.enableMetrics();
 		SpringApplication.run(Season1Application.class, args);
 	}
 
