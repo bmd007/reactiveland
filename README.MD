@@ -56,6 +56,3 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 ##### Challenges commit id: ``
 ##### [Lecture video]()todo
 ##### [Challenge 1 video]()todo
-
-
-

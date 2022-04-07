@@ -9,9 +9,9 @@
         headLessFishes.add(cutHead(fish));
     }
 -------------------------
-    Flux<Fish> headLessFishes = flux.just(fish1, fish2, ...)
+    Flux<Fish> headLessFishes = Flux.just(fish1, fish2, ...)
         .map(fish -> cutHead(fish))
-        .map(headLessFish -> ....)
+        .filter(headLessFish -> ....)
 
 ## Flux
 Flux is a reactive type which might at some point in time contain one or more elements.
@@ -46,6 +46,6 @@ StepVerifier works for Flux similar to Mono.
         .expectComplete()
         .verify();
 
-[//]: # (pure functions and side effects)
 [//]: # (....,webClient, download uptown funk, play up town funk)
+[//]: # (pure functions and side effects)
 
