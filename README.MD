@@ -56,3 +56,10 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 ##### Challenges commit id: ``
 ##### [Lecture video]()todo
 ##### [Challenge 1 video]()todo
+
+
+## Season 2: Reactive programming tools, libraries and frameworks
+### Episode 1: [Interet!](reactiveland-s1-basics/src/test/java/reactiveland/season2/episode1)
+##### Challenges commit id: `todo`
+##### [Lecture video]() todo
+##### [Challenge 1 video]()todo

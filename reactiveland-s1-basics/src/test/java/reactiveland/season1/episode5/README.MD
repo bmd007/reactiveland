@@ -45,7 +45,3 @@ StepVerifier works for Flux similar to Mono.
         .expectNext(x2)
         .expectComplete()
         .verify();
-
-[//]: # (....,webClient, download uptown funk, play up town funk)
-[//]: # (pure functions and side effects)
-
