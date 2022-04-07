@@ -24,4 +24,13 @@ class TheInternet {
         // todo
     }
 
+    @Test
+    void countCompletedTodos(){
+        //given
+        var todosHost = "https://gorest.co.in/public/v2";
+        var todosPath = "/todos";
+        //when todo
+        //then todo
+    }
+
 }

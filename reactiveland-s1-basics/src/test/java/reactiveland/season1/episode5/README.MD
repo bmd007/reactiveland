@@ -20,7 +20,6 @@ It's equivalent to Collections (Set, List, ...).
 ### .just
     Flux<X> xs = Flux.just(x1, x2, x3, ....);
     Flux<X> xs = Flux.just(x1);
-
 easiest way to create a Flux 
 
 ### .fromIterable();
@@ -32,16 +31,25 @@ easiest way to create a Flux
     Flux<X> xs2 = Flux.just(x3, x4);
     Flux<X> xs = xs1.concatWith(xs2); ----> x1, x2, x3, x4
 
+### .flatMapIterable 
+    List<X> list = List.of(x1, x2, x3)
+    var container = new Container(list, y, z)
+    Mono<Container> mono = Mono.just(container)
+    Flux<X> flux = mono.flatMapIterable(Container::list)
+When you have an iterable inside a mono, and want a flux containing the elements of iterable.
+
 ### Publisher
 Is a base reactive type.
 Mono and Flux both extend publisher, so most of the apis that we played with using Mono are also available in Flux.
 Filer, Map, doOnNext, SwitchIfEmpty and ... .
 
-### Testing and assertion
-StepVerifier works for Flux similar to Mono. 
-   
+### Testing and assertion 
      StepVerifier.create(Flux.just(x1,x2))
         .expectNext(x1)
         .expectNext(x2)
         .expectComplete()
         .verify();
+StepVerifier works for Flux similar to Mono.
+
+## Assigment
+### Learn about flatMapMany through an example

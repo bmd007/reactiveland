@@ -85,4 +85,21 @@ class MoreThanOneFish {
                 .verify();
     }
 
+    record FishBatch(Set<Fish> fishSet){}
+
+    @Test
+    void only2FreshFishes(){
+        //given
+        var frozenFish = new Fish("frozen fish", 10, LocalDateTime.now().minusMonths(1L));
+        var freshFish = new Fish("caught today", 4, LocalDateTime.now().minusHours(2L));
+        var bigNotFreshFish = new Fish("caught way back", 6, LocalDateTime.now().minusYears(2L));
+        var freshEnoughFish = new Fish("caught today", 4, LocalDateTime.now().minusHours(22L));
+        var fishBatch = new FishBatch(Set.of(bigNotFreshFish, freshEnoughFish, frozenFish, freshFish));
+        var frozenFishMono = Mono.just(fishBatch);
+
+        //when
+        //todo
+        //then
+        //todo
+    }
 }
