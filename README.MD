@@ -63,3 +63,8 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 ##### Challenges commit id: `todo`
 ##### [Lecture video]() todo
 ##### [Challenge 1 video]()todo
+
+### Episode 2: [Testing Internet!](reactiveland-s1-basics/src/test/java/reactiveland/season2/episode2)
+##### Challenges commit id: `todo`
+##### [Lecture video]() todo
+##### [Challenge 1 video]()todo

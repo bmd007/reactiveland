@@ -14,7 +14,7 @@ class TheInternet {
 
     @Test
     void getAnAdviceFromInternet(){
-        //given a stone
+        //given
         var adviserHost = "https://api.adviceslip.com";
         var getAdvicePath = "/advice";
         //when
