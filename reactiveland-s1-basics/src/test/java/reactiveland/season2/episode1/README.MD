@@ -1,7 +1,7 @@
 # Internet
 ![Internet](internet.jpeg)
 
-## WebClient
+## [WebClient](https://www.baeldung.com/spring-5-webclient)
 
 #### Declarative vs imperative
     RestTemplate restTemplate = new RestTemplate();
@@ -61,10 +61,3 @@ StepVerifier is still useful here.
         .expectNext(x1)
         .expectComplete()
         .verify();
-
-[//]: # (webTestClient)
-[//]: # (webflux)
-[//]: # (hot publisher vs cold publisher https://projectreactor.io/docs/core/release/reference/#reactor.hotCold)
-[//]: # (defer vs just)
-[//]: # (pure functions and side effects)
-
