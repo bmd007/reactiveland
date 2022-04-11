@@ -86,7 +86,7 @@ class MoreThanOneFish {
     record FishBatch(Set<Fish> fishSet){}
 
     @Test
-    void only2FreshFishes(){
+    void only2FreshFishesInTheBatch(){
         //given
         var frozenFish = new Fish("frozen fish", 10, LocalDateTime.now().minusMonths(1L));
         var freshFish = new Fish("caught today", 4, LocalDateTime.now().minusHours(2L));
