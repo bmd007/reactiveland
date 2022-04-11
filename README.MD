@@ -53,9 +53,12 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 ##### [Challenge 1 video](https://youtu.be/MDKLk_TjS1Y)
 
 ### Episode 5: [More than one fish!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode5)
-##### Challenges commit id: ``
-##### [Lecture video]()todo
-##### [Challenge 1 video]()todo
+##### Challenges commit id: `d99ea1855eec9741c15d338518c7caf7ad78264e`
+##### [Lecture video](https://youtu.be/40IaNx6tFcg)
+##### [Challenge 1 video](https://youtu.be/CpLatvBC6uU)
+##### [Challenge 2 video](https://youtu.be/NYxLBVTk19o)
+##### [Challenge 3 video](https://youtu.be/P3CTL2zUb8k)
+##### [Challenge 4 video](https://youtu.be/5na_vx4hab4)
 
 
 ## Season 2: Reactive programming tools, libraries and frameworks

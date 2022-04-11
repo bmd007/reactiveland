@@ -16,22 +16,30 @@ class MoreThanOneFish {
         String name;
         int size;
         LocalDateTime catchTime;
+        private boolean hasHead;
 
         public Fish(String name, int size, LocalDateTime catchTime) {
             this.name = name;
             this.size = size;
             this.catchTime = catchTime;
+            this.hasHead = true;
         }
 
         public Fish(){
             name  = "fish_"+ System.currentTimeMillis();
             size = 3; 
             catchTime = LocalDateTime.now().minusHours(4);
+            hasHead = true;
         }
         
         public Fish cutHead(){
             size = size - 1;
+            hasHead = false;
             return this;
+        }
+
+        public boolean hasHead() {
+            return hasHead;
         }
     }
 
@@ -50,9 +58,12 @@ class MoreThanOneFish {
         var fish2 = new Fish();
         var fish3 = new Fish();
         //when
-        Flux<Fish> river = null; //todo
+        Flux<Fish> river = Flux.just(fish1, fish2, fish3);
         // then
-        //todo
+        StepVerifier.create(river)
+                .expectNext(fish1, fish2, fish3)
+                .expectComplete()
+                .verify();
     }
 
     @Test
@@ -61,9 +72,17 @@ class MoreThanOneFish {
         var fishBatch1 = List.of(new Fish(), new Fish());
         var fishBatch2 = Set.of(new Fish(), new Fish());
         //when
-        Flux<Fish> fishCleaningMachine = null;//todo
+        Flux<Fish> fishCleaningMachine = Flux.fromIterable(fishBatch1)
+                .concatWith(Flux.fromIterable(fishBatch2))
+                .map(Fish::cutHead);
         //then
-        //todo
+        StepVerifier.create(fishCleaningMachine)
+                .expectNextMatches(fish -> !fish.hasHead())
+                .expectNextMatches(fish -> !fish.hasHead())
+                .expectNextMatches(fish -> !fish.hasHead())
+                .expectNextMatches(fish -> !fish.hasHead())
+                .expectComplete()
+                .verify();
     }
 
     @Test
@@ -74,7 +93,9 @@ class MoreThanOneFish {
         var bigNotFreshFish = new Fish("caught way back", 6, LocalDateTime.now().minusYears(2L));
         var freshEnoughFish = new Fish("caught today", 4, LocalDateTime.now().minusHours(22L));
         //when
-        Mono<Fish> soupFishes = null;
+        Flux<Fish> soupFishes = Flux.just(frozenFish, freshFish, bigNotFreshFish, freshEnoughFish)
+                .filter(this::isFreshEnough)
+                .filter(this::isNotTooBig);
         //then
         StepVerifier.create(soupFishes)
                 .expectNext(freshFish)
@@ -93,10 +114,14 @@ class MoreThanOneFish {
         var bigNotFreshFish = new Fish("caught way back", 6, LocalDateTime.now().minusYears(2L));
         var freshEnoughFish = new Fish("caught today", 4, LocalDateTime.now().minusHours(22L));
         var fishBatch = new FishBatch(Set.of(bigNotFreshFish, freshEnoughFish, frozenFish, freshFish));
-        var fishBatchMono = Mono.just(fishBatch);
         //when
-        //todo
+        var freshFishBatch = Mono.just(fishBatch)
+                .flatMapIterable(FishBatch::fishSet)
+                .filter(this::isFreshEnough);
         //then
-        //todo
+        StepVerifier.create(freshFishBatch)
+                .expectNextCount(2)
+                .expectComplete()
+                .verify();
     }
 }
