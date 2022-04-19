@@ -24,7 +24,7 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	annotationProcessor 'org.projectlombok:lombok'
-	implementation'io.projectreactor.addons:reactor-extra:3.4.7'
+	implementation'io.projectreactor.addons:reactor-extra:3.4.8'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'
 }
