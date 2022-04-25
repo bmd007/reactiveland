@@ -64,8 +64,8 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 ## Season 2: Reactive programming tools, libraries and frameworks
 ### Episode 1: [Interet!](reactiveland-s1-basics/src/test/java/reactiveland/season2/episode1)
 ##### Challenges commit id: `b2e776b05e514b403b1693d43ab364bd9c5c9187`
-##### [Lecture video]() todo
-##### [Challenge 1 video]()todo
+##### [Lecture video](https://youtu.be/31MOhZMZQLM)
+##### [Challenge 1 video](https://youtu.be/2HZiAO2_rOo)
 
 ### Episode 2: [Testing Internet!](reactiveland-s1-basics/src/test/java/reactiveland/season2/episode2)
 ##### Challenges commit id: `todo`
