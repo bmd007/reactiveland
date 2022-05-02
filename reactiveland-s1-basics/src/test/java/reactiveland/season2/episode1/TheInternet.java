@@ -74,7 +74,7 @@ class TheInternet {
 
     @Test
     void randomSentence(){
-        var randomWordsMono = WebClient.builder()
+        var randomSentenceMono = WebClient.builder()
                 .baseUrl("https://random-num-x5ht4amjia-uc.a.run.app")
                 .build()
                 .get()
@@ -94,7 +94,7 @@ class TheInternet {
                 .reduce((s, s2) -> s.concat(" ").concat(s2))
                 .log();
 
-        StepVerifier.create(randomWordsMono)
+        StepVerifier.create(randomSentenceMono)
                 .expectNext(" wrong ")
                 .expectComplete()
                 .verify();
