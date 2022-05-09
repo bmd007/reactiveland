@@ -3,7 +3,7 @@
 
 ## [WebTestClient](https://www.baeldung.com/spring-5-webclient)
 
-#### Declarative vs imperative
+#### rest assured vs webTestClient
     when()
       .get("/lotto/{id}", 5).
     then()
