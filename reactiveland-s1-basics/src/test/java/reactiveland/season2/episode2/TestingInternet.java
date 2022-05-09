@@ -11,11 +11,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class TestingInternet {
 
     record Advice(Slip slip){
+       record Slip(String id, String advice){}
        public boolean isLongEnough(){
             return slip.advice.length() > 3;
         }
     }
-    record Slip(String id, String advice){}
 
     @Test
     void internetCanGiveAdviceLongerThan3Words(){
