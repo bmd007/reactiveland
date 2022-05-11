@@ -11,21 +11,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class JustABox {
 
-    record Stone(){
-        String getColor(){
+    record Stone() {
+        String getColor() {
             return "Red";
         }
     }
 
     @Test
-    void putARedStoneInABoxAndPrintTheColor(){
+    void putARedStoneInABoxAndPrintTheColor() {
         //given a stone
-            Stone redStone = new Stone();
+        Stone redStone = new Stone();
         //when creating a Mono with a red stone in it
-             Mono<Stone> stoneBox = Mono.just(redStone);
-             String color = stoneBox.block().getColor();
+        Mono<Stone> stoneBox = Mono.just(redStone);
+        String color = stoneBox.block().getColor();
         //then print it's color
-            System.out.println(color);
+        System.out.println(color);
     }
 
     @Test
@@ -38,7 +38,7 @@ class JustABox {
     }
 
     @Test
-    void createAMonoOfRedStoneAndVerifyIt(){
+    void createAMonoOfRedStoneAndVerifyIt() {
         //given a stone
         Stone redStone = new Stone();
         //when creating a Mono with a red stone in it
@@ -51,7 +51,7 @@ class JustABox {
     }
 
     @Test
-    void createAnEmptyBoxAndVerifyIt(){
+    void createAnEmptyBoxAndVerifyIt() {
         Mono<Object> emptyBox = Mono.empty();
         StepVerifier.create(emptyBox)
                 .expectNextCount(0)
@@ -59,7 +59,7 @@ class JustABox {
                 .verify();
     }
 
-    Mono<Stone> putARedStoneInABoxAfter5Seconds(){
+    Mono<Stone> putARedStoneInABoxAfter5Seconds() {
         return Mono.delay(Duration.ofSeconds(5)).map(ignore -> new Stone());
     }
 }

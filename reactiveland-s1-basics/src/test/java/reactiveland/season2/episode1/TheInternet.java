@@ -12,11 +12,14 @@ import reactor.test.StepVerifier;
 
 class TheInternet {
 
-    private record Advice(Integer id, String advice){}
-    private record Body(Advice slip){}
+    private record Advice(Integer id, String advice) {
+    }
+
+    private record Body(Advice slip) {
+    }
 
     @Test
-    void getAnAdviceFromInternet(){
+    void getAnAdviceFromInternet() {
         //given
         var adviserHost = "https://api.adviceslip.com";
         var getAdvicePath = "/advice/81";
@@ -46,10 +49,11 @@ class TheInternet {
                 .verify();
     }
 
-    private record Todo(int id, int user_id, String title, String date, String status){}
+    private record Todo(int id, int user_id, String title, String date, String status) {
+    }
 
     @Test
-    void countCompletedTodos(){
+    void countCompletedTodos() {
         //given
         var todosHost = "https://gorest.co.in/public/v2";
         var todosPath = "/todos";
@@ -74,7 +78,7 @@ class TheInternet {
 
     @Disabled
     @Test
-    void randomSentence(){
+    void randomSentence() {
         var randomSentenceMono = WebClient.builder()
                 .baseUrl("https://random-num-x5ht4amjia-uc.a.run.app")
                 .build()

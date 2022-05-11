@@ -7,9 +7,9 @@ import reactor.core.scheduler.Schedulers;
 @SpringBootApplication
 public class Application {
 
-	public static void main(String[] args) {
-		Schedulers.enableMetrics();
-		SpringApplication.run(Application.class, args);
-	}
+    public static void main(String[] args) {
+        Schedulers.enableMetrics();
+        SpringApplication.run(Application.class, args);
+    }
 
 }

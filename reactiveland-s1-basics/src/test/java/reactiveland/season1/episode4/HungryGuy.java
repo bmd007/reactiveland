@@ -8,7 +8,7 @@ import java.time.LocalTime;
 public class HungryGuy {
 
     public void getFood(String foodName) {
-        System.out.println(" eating "+ foodName + "  " + LocalTime.now());
+        System.out.println(" eating " + foodName + "  " + LocalTime.now());
         try {
             Thread.sleep(10L);
         } catch (InterruptedException e) {

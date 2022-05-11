@@ -12,7 +12,7 @@ import java.util.Set;
 
 class MoreThanOneFish {
 
-    class Fish{
+    class Fish {
         String name;
         int size;
         LocalDateTime catchTime;
@@ -25,14 +25,14 @@ class MoreThanOneFish {
             this.hasHead = true;
         }
 
-        public Fish(){
-            name  = "fish_"+ System.currentTimeMillis();
-            size = 3; 
+        public Fish() {
+            name = "fish_" + System.currentTimeMillis();
+            size = 3;
             catchTime = LocalDateTime.now().minusHours(4);
             hasHead = true;
         }
-        
-        public Fish cutHead(){
+
+        public Fish cutHead() {
             size = size - 1;
             hasHead = false;
             return this;
@@ -43,16 +43,16 @@ class MoreThanOneFish {
         }
     }
 
-    boolean isNotTooBig(Fish fish){
+    boolean isNotTooBig(Fish fish) {
         return fish.size < 5;
     }
 
-    boolean isFreshEnough(Fish fish){
+    boolean isFreshEnough(Fish fish) {
         return fish.catchTime.isAfter(LocalDateTime.now().minusDays(1L));
     }
 
     @Test
-    void assertTheFishesInTheRiver(){
+    void assertTheFishesInTheRiver() {
         //given
         var fish1 = new Fish();
         var fish2 = new Fish();
@@ -67,7 +67,7 @@ class MoreThanOneFish {
     }
 
     @Test
-    void cutTheHeadOfFishes(){
+    void cutTheHeadOfFishes() {
         //given
         var fishBatch1 = List.of(new Fish(), new Fish());
         var fishBatch2 = Set.of(new Fish(), new Fish());
@@ -86,7 +86,7 @@ class MoreThanOneFish {
     }
 
     @Test
-    void onlyUseFreshAndSmallFishesForSoup(){
+    void onlyUseFreshAndSmallFishesForSoup() {
         //given
         var frozenFish = new Fish("frozen fish", 10, LocalDateTime.now().minusMonths(1L));
         var freshFish = new Fish("caught today", 4, LocalDateTime.now().minusHours(2L));
@@ -104,10 +104,11 @@ class MoreThanOneFish {
                 .verify();
     }
 
-    record FishBatch(Set<Fish> fishSet){}
+    record FishBatch(Set<Fish> fishSet) {
+    }
 
     @Test
-    void only2FreshFishesInTheBatch(){
+    void only2FreshFishesInTheBatch() {
         //given
         var frozenFish = new Fish("frozen fish", 10, LocalDateTime.now().minusMonths(1L));
         var freshFish = new Fish("caught today", 4, LocalDateTime.now().minusHours(2L));

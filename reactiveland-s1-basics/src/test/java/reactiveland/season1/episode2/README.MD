@@ -1,9 +1,11 @@
 # GarbageDryFish!
 
 #### River, pipeline, tap
+
 ![bleiksa river iceland](bleiksa-river-waterfall-iceland.jpeg)
 
 #### Declarative vs imperative
+
     x == null ?
     
     try(){}catch(Exception e){}
@@ -18,16 +20,17 @@
 
     map(x -> y = x ^ 10)
     x (next signal): FISH
-  
-    
+
 ### Map
+
     Mono<?> = Mono.just("a legnthy string")
         .map(string -> string.length)
         .map(stringLength -> ?   )
 
-mapping a string to its length and what next ? 
-    
+mapping a string to its length and what next ?
+
 ### doOnError
+
     Mono.just("something")
         .map(x -> x.a)
         .map(a -> errorPronefunction(a))
@@ -37,12 +40,14 @@ mapping a string to its length and what next ?
 do something asynchronously where an error happens in the stream
 
 ### onErrorMap
+
     ...
         .onErrorMap(currentError -> new throwable)
 
-map current error in the stream into another one 
+map current error in the stream into another one
 
 ### expectErrorMatches
+
     Mono<X> errorMono = mono containing error.
         
     StepVerifier.create(errorMono)

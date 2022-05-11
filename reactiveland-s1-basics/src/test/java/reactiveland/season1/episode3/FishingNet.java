@@ -1,21 +1,16 @@
 package reactiveland.season1.episode3;
 
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class FishingNet {
 
     @Test
-    void noEvenNumberInTheMono(){
+    void noEvenNumberInTheMono() {
         //given
         int number = 44;
         //when
@@ -29,22 +24,23 @@ class FishingNet {
                 .verify();
     }
 
-    record Fish(String name, int size, LocalDateTime catchTime){}
+    record Fish(String name, int size, LocalDateTime catchTime) {
+    }
 
-    boolean isFishBigEnough(Fish fish){
+    boolean isFishBigEnough(Fish fish) {
         return fish.size >= 5;
     }
 
-    boolean isFishFreshEnough(Fish fish){
+    boolean isFishFreshEnough(Fish fish) {
         return fish.catchTime.isAfter(LocalDateTime.now().minusDays(1L));
     }
 
-    Mono<Fish> catchABigFish(){
+    Mono<Fish> catchABigFish() {
         return Mono.just(new Fish("fresh fish", 8, LocalDateTime.now().minusMinutes(30L).truncatedTo(ChronoUnit.MINUTES)));
     }
 
     @Test
-    void useFrozenFishIfNoBigEnoughFreshFish(){
+    void useFrozenFishIfNoBigEnoughFreshFish() {
         //given
         var frozenFish = new Fish("frozen fish", 10, LocalDateTime.now().minusMonths(1L));
         var freshFish = new Fish("caught today", 4, LocalDateTime.now().minusHours(2L));
@@ -69,14 +65,14 @@ class FishingNet {
     }
 
     @Test
-    void notFoundExceptionWhenNoBigEnoughFreshFish(){
+    void notFoundExceptionWhenNoBigEnoughFreshFish() {
         //given
         var fish = new Fish("bought today", 8, LocalDateTime.now().minusDays(5L));
         //when
         Mono<Fish> bigEnoughFreshFish = Mono.just(fish)
-                    .filter(this::isFishBigEnough)
-                    .filter(this::isFishFreshEnough)
-                    .switchIfEmpty(Mono.error(new FishNotFoundException("no big enough fresh fish")));
+                .filter(this::isFishBigEnough)
+                .filter(this::isFishFreshEnough)
+                .switchIfEmpty(Mono.error(new FishNotFoundException("no big enough fresh fish")));
         //then
         StepVerifier.create(bigEnoughFreshFish)
                 .expectErrorMatches(error -> error instanceof FishNotFoundException)
@@ -84,15 +80,15 @@ class FishingNet {
     }
 
     @Test
-    void catchFishIfNoBigEnoughFreshFish(){
+    void catchFishIfNoBigEnoughFreshFish() {
         //given
         var fish = new Fish("bought today", 8, LocalDateTime.now().minusDays(5L));
         var expectedFish = new Fish("fresh fish", 8, LocalDateTime.now().minusMinutes(30L).truncatedTo(ChronoUnit.MINUTES));
         //when
-            Mono<Fish> bigEnoughFreshFish = Mono.just(fish)
-                    .filter(this::isFishBigEnough)
-                    .filter(this::isFishFreshEnough)
-                    .switchIfEmpty(catchABigFish());
+        Mono<Fish> bigEnoughFreshFish = Mono.just(fish)
+                .filter(this::isFishBigEnough)
+                .filter(this::isFishFreshEnough)
+                .switchIfEmpty(catchABigFish());
         //then
         //todo
         StepVerifier.create(bigEnoughFreshFish)
@@ -102,9 +98,9 @@ class FishingNet {
     }
 
     @Test
-    void nullIsNotEmptyButIsError(){
+    void nullIsNotEmptyButIsError() {
         //when
-        Mono mono = Mono.<Integer>just(2)
+        Mono mono = Mono.just(2)
                 .map(a -> null)
                 .onErrorMap(e -> new IllegalArgumentException())
                 .defaultIfEmpty(3);
