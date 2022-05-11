@@ -5,11 +5,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import reactor.core.scheduler.Schedulers;
 
 @SpringBootApplication
-public class Season1Application {
+public class Application {
 
 	public static void main(String[] args) {
 		Schedulers.enableMetrics();
-		SpringApplication.run(Season1Application.class, args);
+		SpringApplication.run(Application.class, args);
 	}
 
 }

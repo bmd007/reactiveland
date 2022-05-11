@@ -2,6 +2,7 @@ package reactiveland.season2.episode1;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -52,7 +53,6 @@ class TheInternet {
         //given
         var todosHost = "https://gorest.co.in/public/v2";
         var todosPath = "/todos";
-        ObjectMapper objectMapper = new ObjectMapper();
         //when
         Mono<Long> numberOfTodos = WebClient.builder()
                 .baseUrl(todosHost)
@@ -72,6 +72,7 @@ class TheInternet {
                 .verify();
     }
 
+    @Disabled
     @Test
     void randomSentence(){
         var randomSentenceMono = WebClient.builder()

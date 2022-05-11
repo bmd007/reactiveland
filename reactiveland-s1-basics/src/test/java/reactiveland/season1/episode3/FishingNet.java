@@ -20,7 +20,7 @@ class FishingNet {
         int number = 44;
         //when
         Mono<Integer> oddNumberOnlyMono = Mono.just(number)
-                .filter(n -> n % 2 != 0);//todo
+                .filter(n -> n % 2 != 0);
 
         //then
         StepVerifier.create(oddNumberOnlyMono)
