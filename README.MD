@@ -31,15 +31,15 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 ### How to use: Use the links below to move to the corresponding directory to each episode.
 
 ## Season 1: Reactive programming basics
-### Episode 1: [Just a box!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode1)
+### Episode 1: [Just a box!](reactiveland-basics/src/test/java/reactiveland/season1/episode1)
 ##### Challenges commit id: `7cd7970042afa5fbb64814494f29808a225cb446`
 ##### [Lecture video](https://youtu.be/vo9MmVlVyQM) 
 
-### Episode 2: [Garbage Dry Fish!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode2)
+### Episode 2: [Garbage Dry Fish!](reactiveland-basics/src/test/java/reactiveland/season1/episode2)
 ##### Challenges commit id: `a6bbc988592690020747a81a4014bba47dd679e9`
 ##### [Lecture video](https://youtu.be/qzBCElYrkdo)
 
-### Episode 3: [Fishing Net!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode3)
+### Episode 3: [Fishing Net!](reactiveland-basics/src/test/java/reactiveland/season1/episode3)
 ##### Challenges commit id: `2129a27c309e99bec15aba816aa9005a3e4dc231`
 ##### [Lecture video](https://www.youtube.com/watch?v=PEESaoM0zdg&ab_channel=Reactiveland)
 ##### [Challenge 1 video](https://youtu.be/Zpk1IhGhQ2s)
@@ -47,12 +47,12 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 ##### [Challenge 3 video](https://youtu.be/71C1NmRWhik)
 ##### [Challenge 4 and 5 video](https://youtu.be/w4jKuqexnTo)
 
-### Episode 4: [Water and electricity!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode4)
+### Episode 4: [Water and electricity!](reactiveland-basics/src/test/java/reactiveland/season1/episode4)
 ##### Challenges commit id: `1806dac211f670a90a6bd51d4c75a223943e9f12`
 ##### [Lecture video](https://youtu.be/BbNs4VglFeo)
 ##### [Challenge 1 video](https://youtu.be/MDKLk_TjS1Y)
 
-### Episode 5: [More than one fish!](reactiveland-s1-basics/src/test/java/reactiveland/season1/episode5)
+### Episode 5: [More than one fish!](reactiveland-basics/src/test/java/reactiveland/season1/episode5)
 ##### Challenges commit id: `d99ea1855eec9741c15d338518c7caf7ad78264e`
 ##### [Lecture video](https://youtu.be/40IaNx6tFcg)
 ##### [Challenge 1 video](https://youtu.be/CpLatvBC6uU)
@@ -62,12 +62,17 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 
 
 ## Season 2: Reactive programming tools, libraries and frameworks
-### Episode 1: [Interet!](reactiveland-s1-basics/src/test/java/reactiveland/season2/episode1)
+### Episode 1: [Interet!](reactiveland-basics/src/test/java/reactiveland/season2/episode1)
 ##### Challenges commit id: `b2e776b05e514b403b1693d43ab364bd9c5c9187`
 ##### [Lecture video](https://youtu.be/31MOhZMZQLM)
 ##### [Challenge 1 video](https://youtu.be/2HZiAO2_rOo)
 
-### Episode 2: [Testing Internet!](reactiveland-s1-basics/src/test/java/reactiveland/season2/episode2)
+### Episode 2: [Testing Internet!](reactiveland-basics/src/test/java/reactiveland/season2/episode2)
+##### Challenges commit id: `f2093fd5297b222d7613f75a981d177e472f0080`
+##### [Lecture video](https://youtu.be/vs1FObvbvRs)
+##### [Challenge 1 video](https://youtu.be/hCcL3wb2sD0)
+
+### Episode 3: [Making Internet!](reactiveland-basics/src/test/java/reactiveland/season2/episode3)
 ##### Challenges commit id: `f2093fd5297b222d7613f75a981d177e472f0080`
 ##### [Lecture video](https://youtu.be/vs1FObvbvRs)
 ##### [Challenge 1 video](https://youtu.be/hCcL3wb2sD0)
