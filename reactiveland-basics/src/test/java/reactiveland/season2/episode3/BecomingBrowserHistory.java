@@ -1,52 +1,43 @@
 package reactiveland.season2.episode3;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 
-class TestingInternet {
+@ActiveProfiles("test")
+@ExtendWith({SpringExtension.class})
+@SpringBootTest
+@AutoConfigureWebTestClient
+class BecomingBrowserHistory {
 
-    record Advice(Slip slip) {
-        record Slip(String id, String advice) {
-        }
-
-        public boolean isLongEnough() {
-            return slip.advice.length() > 3;
-        }
-    }
+    @Autowired
+    WebTestClient webTestClient;
 
     @Test
     void internetCanGiveAdviceLongerThan3Words() {
         //given
-        var objectMapper = new ObjectMapper();
-        var adviserHost = "https://api.adviceslip.com";
-        var getAdvicePath = "/advice";
-        WebTestClient testClient = WebTestClient
-                .bindToServer()
-                .baseUrl(adviserHost)
-                .build();
+        var getAdvicePath = "/api/advice";
         //when
-        testClient
+        webTestClient
                 .get()
                 .uri(getAdvicePath)
                 .exchange()
                 //then
                 .expectStatus()
                 .isOk()
-                .expectHeader().valueEquals("Content-Type", "text/html; charset=UTF-8")
-                .expectBody(String.class)
-                .value(advicePlainText -> {
-                    try {
-                        var advice = objectMapper.readValue(advicePlainText, Advice.class);
-                        assertTrue(advice.isLongEnough());
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+                .expectHeader().valueEquals("Content-Type", APPLICATION_JSON_VALUE)
+                .expectBody(Advice.class)
+                .value(advice -> assertTrue(advice.isLongEnough()));
     }
 
 }
