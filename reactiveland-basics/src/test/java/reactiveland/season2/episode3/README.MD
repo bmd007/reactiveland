@@ -1,4 +1,4 @@
-# Becoming browser history (serving http)
+# Becoming someone's browser history (serving http)
 
 ![Test](history.jpeg)
 
