@@ -73,6 +73,6 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 ##### [Challenge 1 video](https://youtu.be/hCcL3wb2sD0)
 
 ### Episode 3: [Becoming browser history (serving http)](reactiveland-basics/src/test/java/reactiveland/season2/episode3)
-##### Challenges commit id: ``todo
+##### Challenges commit id: `b4fb962517d55c1ffdb0f2a629de2951540d1b93`
 ##### [Lecture video]()todo
 ##### [Challenge 1 video]()todo

@@ -68,8 +68,22 @@ class BecomingBrowserHistory {
 
    @Test
     void internetCanEchoEvenNumbers(){
-        //given
-
+       //given
+       var getAdvicePath = "/api/numbers/filter/evens";
+       var numbers = Flux.fromIterable(IntStream.rangeClosed(0, 10).boxed().toList());
+       var expectedNumbers = List.of(0,2,4,6,8,10);
+       //when
+       webTestClient
+               .post()
+               .uri(getAdvicePath)
+               .body(numbers, Integer.class)
+               .exchange()
+               //then
+               .expectStatus()
+               .isOk()
+               .expectHeader().valueEquals("Content-Type", APPLICATION_JSON_VALUE)
+               .expectBodyList(Integer.class)
+               .value(evens -> assertEquals(expectedNumbers, evens));
     }
 
 }
