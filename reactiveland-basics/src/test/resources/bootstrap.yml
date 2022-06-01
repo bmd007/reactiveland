@@ -1,0 +1,7 @@
+embedded:
+  postgresql:
+    enabled: true
+    docker-image: 'bitnami/postgresql:13.3.0'
+    wait-timeout-in-seconds: 40
+    command: '/opt/bitnami/scripts/postgresql/run.sh'
+    startupLogCheckRegex: '.*database system is ready to accept connections.*'
