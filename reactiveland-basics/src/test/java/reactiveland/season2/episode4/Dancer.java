@@ -8,7 +8,6 @@ import org.springframework.lang.Nullable;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Year;
 import java.util.UUID;
 
 @Table("Dancers")
@@ -19,6 +18,10 @@ public record Dancer(@Id String id,
 
     public static Dancer newDancer(DanceType danceType) {
         return new Dancer(UUID.randomUUID().toString(), LocalDate.of(2001, 1, 1).atStartOfDay(), danceType);
+    }
+
+    public Dancer dance(){
+        return new Dancer(this.id, LocalDateTime.now(), this.danceTypeCompetency);
     }
 
     @Override

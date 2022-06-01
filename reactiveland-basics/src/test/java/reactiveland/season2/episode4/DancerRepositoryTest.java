@@ -52,19 +52,23 @@ class DancerRepositoryTest {
     @Autowired
     DancerRepository dancerRepository;
 
-    @Autowired
-    R2dbcEntityOperations r2dbcOperations;
-
     @Test
     void assertANewlyInsertedDancerInDb() {
         //given
         var dancer = Dancer.newDancer(Dancer.DanceType.FREE_STYLE);
         //when
-        Mono<Dancer> dancerMono = Mono.just(dancer).flatMap(dancerRepository::save).log();
-        //
-        StepVerifier.create(dancerMono)
-                .expectNext(dancer)
-                .expectComplete()
-                .verify();
-    }
+        Mono<Dancer> dancerMono = Mono.just(dancer).flatMap(dancerRepository::save);
+        //todo
+     }
+
+     @Test
+    void assertAChangeInDancerLastDancedAt(){
+        //given
+         //todo
+         //when
+         //todo
+         //then
+         //todo
+     }
+
 }
