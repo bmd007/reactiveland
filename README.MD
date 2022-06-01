@@ -78,3 +78,11 @@ Our journey will happen through a series of short lecture (youtube) followed by 
 ##### [Challenge 1 video](https://youtu.be/lDO72RHkrE8)
 ##### [Challenge 2 video](https://youtu.be/WzyR477Ntck)
 ##### [Challenge 3 video](https://youtu.be/bRYB_TBAkvk)
+
+### Episode 4: [R2DBC](reactiveland-basics/src/test/java/reactiveland/season2/episode4)
+##### Challenges commit id: ``todo
+##### [Lecture video]()todo
+##### [Challenge 1 video]()todo
+##### [Challenge 2 video]()todo
+##### [Challenge 3 video]()todo
+

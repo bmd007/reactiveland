@@ -58,7 +58,7 @@ class FishingNet {
                 .verify();
     }
 
-    private class FishNotFoundException extends Exception {
+    private static class FishNotFoundException extends Exception {
         public FishNotFoundException(String message) {
             super(message);
         }
@@ -90,7 +90,6 @@ class FishingNet {
                 .filter(this::isFishFreshEnough)
                 .switchIfEmpty(catchABigFish());
         //then
-        //todo
         StepVerifier.create(bigEnoughFreshFish)
                 .expectNext(expectedFish)
                 .expectComplete()
