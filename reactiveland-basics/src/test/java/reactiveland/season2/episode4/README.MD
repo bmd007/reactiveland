@@ -23,7 +23,15 @@ blocking ones.
 ### Initialization
 
 1. Dependencies on classpath
-2. Datasource configuration
+2. Configuration
+```
+   r2dbc:
+       url: r2dbc:postgres://username:password@host:$port/database
+       username: ${postgres.username}
+       password: ${postgres.password}
+   ```
+**Note that url structure is different from jdbc**
+
 3. @Repository or inject R2dbcEntityOperations or inject R2dbcEntityTemplate
 
 ### JPA repositories compatibility
