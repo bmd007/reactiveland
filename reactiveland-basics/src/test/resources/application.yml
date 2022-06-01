@@ -1,20 +1,20 @@
 spring:
   application:
     name: realtiveland
-
+#
   r2dbc:
-      url: r2dbc:postgres://${embedded.postgresql.user}:${embedded.postgresql.password}@${embedded.postgresql.host}:${embedded.postgresql.port}/${embedded.postgresql.schema}
-      username: ${embedded.postgresql.user}
-      password: ${embedded.postgresql.password}
+      url: r2dbc:postgres://${postgres.username}:${postgres.password}@localhost:${postgres.port}/${postgres.db}
+      username: ${postgres.username}
+      password: ${postgres.password}
 
-  flyway:
-    url: jdbc:postgresql://${embedded.postgresql.host}:${embedded.postgresql.port}/${embedded.postgresql.schema}
-    user: ${embedded.postgresql.user}
-    password: ${embedded.postgresql.password}
-    baseline-on-migrate: true
-    enabled: true
-
+#  flyway:
+#    url: ${postgres.url}
+#    user: ${postgres.username}
+#    password: ${postgres.password}
+#    baseline-on-migrate: true
+#    enabled: true
+#
 #  datasource:
-#      url: "jdbc:postgresql://${embedded.postgresql.host}:${embedded.postgresql.port}/${embedded.postgresql.schema}"
-#      username: ${embedded.postgresql.user}
-#      password: ${embedded.postgresql.password}
+#    url: ${postgres.url}
+#    user: ${postgres.username}
+#    password: ${postgres.password}

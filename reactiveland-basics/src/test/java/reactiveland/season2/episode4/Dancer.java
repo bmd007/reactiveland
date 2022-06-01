@@ -2,27 +2,28 @@ package reactiveland.season2.episode4;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Persistable;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.lang.Nullable;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
-@Table
-public record Dancer(@Id @NotBlank String id,
-                     @Nullable LocalDateTime lastDancedAt,
-                     @NotNull Dancer.DanceType competentAt)
+@Table("Dancers")
+public record Dancer(@Id String id,
+                     @Nullable @Column("last_danced_at") ZonedDateTime lastDancedAt,
+                     @Column("dance_type_competency") Dancer.DanceType danceTypeCompetency)
         implements Persistable<String> {
 
     public static Dancer newDancer(DanceType danceType) {
-        return new Dancer(UUID.randomUUID().toString(), LocalDateTime.MIN, danceType);
+        return new Dancer(UUID.randomUUID().toString(), LocalDateTime.MIN.atZone(ZoneId.systemDefault()), danceType);
     }
 
     @Override
     public boolean isNew() {
-        return lastDancedAt.equals(LocalDateTime.MIN) && !id.isBlank();
+        return lastDancedAt.equals(LocalDateTime.MIN.atZone(ZoneId.systemDefault())) && !id.isBlank();
     }
 
     @Override
