@@ -6,24 +6,24 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.lang.Nullable;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.Year;
 import java.util.UUID;
 
 @Table("Dancers")
 public record Dancer(@Id String id,
-                     @Nullable @Column("last_danced_at") ZonedDateTime lastDancedAt,
+                     @Nullable @Column("last_danced_at") LocalDateTime lastDancedAt,
                      @Column("dance_type_competency") Dancer.DanceType danceTypeCompetency)
         implements Persistable<String> {
 
     public static Dancer newDancer(DanceType danceType) {
-        return new Dancer(UUID.randomUUID().toString(), LocalDateTime.MIN.atZone(ZoneId.systemDefault()), danceType);
+        return new Dancer(UUID.randomUUID().toString(), LocalDate.of(2001, 1, 1).atStartOfDay(), danceType);
     }
 
     @Override
     public boolean isNew() {
-        return lastDancedAt.equals(LocalDateTime.MIN.atZone(ZoneId.systemDefault())) && !id.isBlank();
+        return lastDancedAt.isAfter(LocalDate.of(2000, 1, 1).atStartOfDay()) && !id.isBlank();
     }
 
     @Override

@@ -60,7 +60,7 @@ class DancerRepositoryTest {
         //given
         var dancer = Dancer.newDancer(Dancer.DanceType.FREE_STYLE);
         //when
-        Mono<Dancer> dancerMono = dancerRepository.save(dancer).log();
+        Mono<Dancer> dancerMono = Mono.just(dancer).flatMap(dancerRepository::save).log();
         //
         StepVerifier.create(dancerMono)
                 .expectNext(dancer)
