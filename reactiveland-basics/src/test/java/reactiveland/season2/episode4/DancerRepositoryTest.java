@@ -21,7 +21,7 @@ import reactor.test.StepVerifier;
 @ActiveProfiles("test")
 @ExtendWith({SpringExtension.class})
 @DirtiesContext
-@DataR2dbcTest(includeFilters = {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {DancerRepository.class})})
+@SpringBootTest
 class DancerRepositoryTest {
 
     @Autowired
