@@ -16,7 +16,7 @@ public record Dancer(@Id @NotBlank String id,
                      @NotNull Dancer.DanceType competentAt)
         implements Persistable<String> {
 
-    public static Dancer newDancer(DanceType danceType){
+    public static Dancer newDancer(DanceType danceType) {
         return new Dancer(UUID.randomUUID().toString(), LocalDateTime.MIN, danceType);
     }
 
@@ -26,7 +26,7 @@ public record Dancer(@Id @NotBlank String id,
     }
 
     @Override
-    public String getId(){
+    public String getId() {
         return id;
     }
 
