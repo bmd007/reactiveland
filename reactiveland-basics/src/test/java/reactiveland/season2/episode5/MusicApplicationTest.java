@@ -1,30 +1,31 @@
-package reactiveland.season2.episode4;
+package reactiveland.season2.episode5;
 
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.r2dbc.core.R2dbcEntityOperations;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
+
+import java.time.LocalDateTime;
 
 
 @ActiveProfiles("test")
 @ExtendWith({SpringExtension.class})
 @DirtiesContext
-@DataR2dbcTest
+@SpringBootTest
 @Testcontainers
-class DancerRepositoryTest {
+@AutoConfigureWebTestClient
+class MusicApplicationTest {
 
     @Container
     public static PostgreSQLContainer<?> postgresDB = new PostgreSQLContainer<>("postgres:14.3")
@@ -49,26 +50,16 @@ class DancerRepositoryTest {
     }
 
     @Autowired
-    DancerRepository dancerRepository;
+    WebTestClient webTestClient;
 
     @Test
-    void assertANewlyInsertedDancerInDb() {
+    void createAMusicThenFindItAmongCreatedMusics() {
         //given
-        var dancer = Dancer.newDancer(Dancer.DanceType.FREE_STYLE);
+        //todo
         //when
-        Mono<Dancer> savedDancerMono = Mono.empty();
+        //todo
         //then
         //todo
-     }
-
-     @Test
-    void assertAChangeInDancerLastDancedAt(){
-        //given
-         //todo
-         //when
-         //todo
-         //then
-         //todo
-     }
+    }
 
 }
