@@ -2,7 +2,7 @@
 
 ## Welcome to Reactive land,
 Where we go through a journey from reactive programming to reactive systems.
-Our journey will happen through a series of short lecture (youtube) followed by an educational programming challenge.
+Our journey will happen through a series of short lecture (Youtube) followed by an educational programming challenge.
 
 ### Who?
  - If you have an overall knowledge about reactive programming but never tried it before.
