@@ -46,3 +46,15 @@ ReactiveCrudRepository for insert.**
 Also, annotations like `@Table("xxxx")` and `@Id` work the same way here.
 
 And ofcourse, methods return reactive type with R2DBC. So test your code using StepVerifier
+
+[//]: # (reactive redis)
+
+[//]: # (reactive mongo)
+
+[//]: # (hot publisher vs cold publisher https://projectreactor.io/docs/core/release/reference/#reactor.hotCold)
+
+[//]: # (defer vs just)
+
+[//]: # (pure functions and side effects)
+
+[//]: # (RSocket)

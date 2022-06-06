@@ -40,7 +40,6 @@ dependencies {
 	testImplementation 'io.projectreactor:reactor-test'
 	testImplementation "org.testcontainers:junit-jupiter:1.17.2"
 	testImplementation "org.testcontainers:postgresql:1.17.2"
-
 }
 
 dependencyManagement {

@@ -57,7 +57,8 @@ class DancerRepositoryTest {
         //given
         var dancer = Dancer.newDancer(Dancer.DanceType.FREE_STYLE);
         //when
-        Mono<Dancer> dancerMono = Mono.just(dancer).flatMap(dancerRepository::save);
+        Mono<Dancer> SavedDancerMono = Mono.empty();
+        //then
         //todo
      }
 
