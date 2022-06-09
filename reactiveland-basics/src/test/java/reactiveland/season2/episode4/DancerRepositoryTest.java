@@ -18,6 +18,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.LocalDate;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 @ActiveProfiles("test")
 @ExtendWith({SpringExtension.class})
@@ -56,19 +60,27 @@ class DancerRepositoryTest {
         //given
         var dancer = Dancer.newDancer(Dancer.DanceType.FREE_STYLE);
         //when
-        Mono<Dancer> savedDancerMono = Mono.empty();
+        Mono<Dancer> savedDancerMono = dancerRepository.save(dancer);
         //then
-        //todo
+        StepVerifier.create(savedDancerMono)
+                .expectNext(dancer)
+                .expectComplete()
+                .verify();
      }
 
      @Test
     void assertAChangeInDancerLastDancedAt(){
         //given
-         //todo
+         var dancer = Dancer.newDancer(Dancer.DanceType.FREE_STYLE);
          //when
-         //todo
+         Mono<Dancer> updatedDancerMono = dancerRepository.save(dancer)
+                 .map(Dancer::dance)
+                 .flatMap(dancerRepository::save);
          //then
-         //todo
+         StepVerifier.create(updatedDancerMono)
+                 .assertNext(updatedDancer -> assertTrue(updatedDancer.lastDancedAt().isAfter(LocalDate.of(2001, 1, 1).atStartOfDay())))
+                 .expectComplete()
+                 .verify();
      }
 
 }

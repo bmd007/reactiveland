@@ -26,7 +26,7 @@ public record Dancer(@Id String id,
 
     @Override
     public boolean isNew() {
-        return lastDancedAt.isAfter(LocalDate.of(2000, 1, 1).atStartOfDay()) && !id.isBlank();
+        return lastDancedAt.isEqual(LocalDate.of(2001, 1, 1).atStartOfDay());
     }
 
     @Override
