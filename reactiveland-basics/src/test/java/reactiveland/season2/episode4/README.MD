@@ -16,6 +16,7 @@
 
     org.springframework.boot
         spring-boot-starter-data-r2dbc
+    org.postgresql:r2dbc-postgresql
 
 plus a db driver like `org.postgresql:r2dbc-postgresql`. Please note that reactive DB drivers are different from
 blocking ones.
