@@ -30,7 +30,7 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok:1.18.24'
 	annotationProcessor 'org.projectlombok:lombok:1.18.24'
 	annotationProcessor 'org.jetbrains:annotations:23.0.0'
-	implementation'io.projectreactor.addons:reactor-extra:3.4.8'
+	implementation'io.projectreactor.addons:reactor-extra:3.5.0'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
 	runtimeOnly 'org.postgresql:r2dbc-postgresql'
