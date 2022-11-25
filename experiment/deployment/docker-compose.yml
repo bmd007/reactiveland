@@ -49,3 +49,40 @@ services:
       - prometheus
     ports:
       - '3000:3000'
+
+  servlet:
+    container_name: servlet
+    hostname: servlet
+    image: bmd007/reactiveland-experiment-servlet
+    ports:
+      - "8001:8001"
+    depends_on:
+      - consul
+      - prometheus
+      - grafana
+    environment:
+      SERVICE_IGNORE: any_value
+
+  servlet-client:
+    container_name: servlet-client
+    hostname: servlet
+    image: bmd007/reactiveland-experiment-servlet-client
+    ports:
+      - "8002:8002"
+    depends_on:
+      - servlet
+      - consul
+      - prometheus
+      - grafana
+    environment:
+      SERVICE_IGNORE: any_value
+
+  # Registrator to register services in consul
+  registrator:
+    container_name: registrator
+    image: gliderlabs/registrator
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock
+    command: "-internal consul://consul:8500"
+    depends_on:
+      - consul

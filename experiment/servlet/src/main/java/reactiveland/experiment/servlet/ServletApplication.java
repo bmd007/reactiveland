@@ -1,15 +1,14 @@
 package reactiveland.experiment.servlet;
 
-import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -24,7 +23,6 @@ import java.util.UUID;
 import java.util.zip.GZIPOutputStream;
 
 @RestController
-@RequestMapping("experiment/servlet")
 @SpringBootApplication
 public class ServletApplication {
 
@@ -40,11 +38,11 @@ public class ServletApplication {
     record PossibleFileSizeRequestBody(UUID id) {
     }
 
-    record PossibleFileSizeResponseBody(long gZipedSize, long hashSize) {
+    record PossibleFileSizeResponseBody(long gZipSize, long hashSize) {
     }
 
-    @PostMapping
-    PossibleFileSizeResponseBody possibleFileSize(PossibleFileSizeRequestBody requestBody) throws IOException {
+    @PostMapping(value = "/")
+    PossibleFileSizeResponseBody possibleFileSize(@RequestBody PossibleFileSizeRequestBody requestBody) throws IOException {
         var hash = messageDigest.digest(requestBody.id.toString().getBytes(StandardCharsets.UTF_8));
         LOGGER.info("hash value in base64 {}", BASE64.encodeToString(hash));
         File tempFile = File.createTempFile("servlet", "experiment");

@@ -1,5 +1,5 @@
 server:
-    port: 8001
+    port: 8002
 
 management:
     health:
@@ -40,7 +40,7 @@ spring:
     config:
         import: optional:consul:consul:8500
     application:
-        name: servlet
+        name: servlet-client
     cloud:
         consul:
             discovery:
