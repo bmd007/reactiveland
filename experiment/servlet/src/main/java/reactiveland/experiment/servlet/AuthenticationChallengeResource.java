@@ -2,6 +2,8 @@ package reactiveland.experiment.servlet;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -45,10 +47,18 @@ public class AuthenticationChallengeResource {
 
     private static final String A_CUSTOMER_PUBLIC_KEY = """
                 -----BEGIN PUBLIC KEY-----
-                MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCzLkmmMTR4XtbaUd7HJHzoTiAu
-                K99j27MXhBMPL7FDK1nvmqBjvI8MSSIvPjRfYU9wkX5E6xi5DTu/597Pfj0x8q6m
-                b5Cyfm+rx/dzrdBHhfaKHM4jl6o3bk9wt1NOtBDWftPFW5SRh09yjc/TuCMHg4VP
-                wsbFOmA0rHXrEbu/cQIDAQAB
+                MIICITANBgkqhkiG9w0BAQEFAAOCAg4AMIICCQKCAgBKWLo9XZOnDfTZbIYB2fqT
+                WVVkWyx46DQ2/3cEWQIzcCR5MFwLIuW/zEySj2sF7pngzA2NZfvLxaecf3xiiCTi
+                ptDUbLLNVDClDS149SnP0oAO6fpEv0BNJt4aK7Yrs4o3u0iJeLZ9mZECcJki3vWz
+                TTEKCUgl29ZAz/2MbXC8S+LCQMgP/lxlYMTOKoPV/1L624nhxVLE7L5qHzUQXITZ
+                mmxwfdMVbSNzUIXXAweHwzQ++SoCN0/vVkhUK5Pl+HTXkVMIcEbglYXKipNW5NBD
+                I/rpxflzzosHtI6ErXkFGAEn84xHuUiagCyt+OQITrgWacEI2Tc8u9aryKeS6m3R
+                7Z9To/HxC7dYTf4gh8HJvunzgx06AsjpfL8mlel7o9uj5Ym5025xt+yb0nQ7tH+d
+                P0OsNLcGJO1XCpARS/Y9TM2Nha5cX5PdgbcG/bAL+J22l+HBgaQIuvvya/qUJV9l
+                1TxxHFsUKJaS3vKTYteaF+WrvTJlqBaVEBGjOlPczyUbl76EOSyxDnagLx6FXmOb
+                8liUUxIqWqYHk1hJ091vYiyd5/Lx/ol7otNw2y3v6DhKMRFioJxpjWQ8RCN8ZcVW
+                O8qOaAQyPnIMhuiurFKu75QFNpjsccHc4GhrExzYn8mifiRN5LtpbRieaHQEtHyC
+                x5hMf7WkGfKxvDKvyJBXGwIDAQAB
                 -----END PUBLIC KEY-----
             """.trim();
 
@@ -104,9 +114,7 @@ public class AuthenticationChallengeResource {
 //            challengeRepository.delete(signingNonce);
 //            throw new InvalidEnrollmentException(enrollmentEntity.getDeviceId());
 //        }
-        byte[] encoded = Base64.getDecoder().decode(A_CUSTOMER_PUBLIC_KEY);
-        var keySpec = new X509EncodedKeySpec(encoded);
-        var publicKey = (RSAPublicKey) keyFactory.generatePublic(keySpec);
+        RSAKey publicKey = JWK.parseFromPEMEncodedObjects(A_CUSTOMER_PUBLIC_KEY).toRSAKey();
         if (!signedJWT.verify(new RSASSAVerifier(publicKey))) {
             log.warn("Invalid signature with JWT {}", challengeResponse.jwt);
             repository.save(challenge.kill());
@@ -119,10 +127,11 @@ public class AuthenticationChallengeResource {
     public String authenticate(@PathVariable String id, @PathVariable String nonce) {
         AuthenticationChallenge challenge = repository.findById(id)
                 .filter(AuthenticationChallenge::isAlive)
+                .filter(ch -> SIGNED.equals(ch.state))
                 .orElseThrow(() -> NOT_FOUND_OR_DEAD_UNAUTHORIZED_EXCEPTION);
         repository.save(challenge.kill());
         if (!challenge.authenticate(nonce)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "invalid nonce or state");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "invalid nonce");
         }
         return challenge.customerId;
     }

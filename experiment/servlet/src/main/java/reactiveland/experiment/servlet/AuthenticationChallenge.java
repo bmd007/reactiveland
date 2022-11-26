@@ -83,7 +83,7 @@ public class AuthenticationChallenge {
     }
 
     public boolean authenticate(String nonce) {
-        return isAlive() && States.SIGNED.equals(state) && nonce.equals(this.nonce);
+        return nonce.equals(this.nonce);
     }
 
     public boolean isAlive() {
