@@ -1,45 +1,64 @@
 package reactiveland.experiment.servlet;
 
 import io.micrometer.core.instrument.Metrics;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
-import java.util.UUID;
-
+@Slf4j
 @SpringBootApplication
 public class ServletClientApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ServletClientApplication.class, args);
-	}
+    private final WebClient webClient;
 
-	@Autowired WebClient.Builder webClientBuilder;
+    public ServletClientApplication(WebClient.Builder webClientBuilder) {
+        this.webClient = webClientBuilder
+                .codecs(codec -> codec.defaultCodecs().maxInMemorySize(16 * 1024 * 1024))
+                .baseUrl("http://servlet")
+                .build();
+    }
 
-	record PossibleFileSizeRequestBody(UUID id) {
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ServletClientApplication.class, args);
+    }
 
-	record PossibleFileSizeResponseBody(long gZipSize, long hashSize) {
-	}
+    @EventListener(ApplicationReadyEvent.class)
+    public void start() {
+        deleteAllPreviousChallenges().block();
+        for (int i = 0; i < 1_000_000; i++) {
+            askForChallengeAndUseIt().block();
+        }
+    }
 
-	@EventListener(ApplicationReadyEvent.class)
-	public void start() {
-		for (int i = 0; i < 1_000_000_000; i++){
-			PossibleFileSizeResponseBody response = webClientBuilder.build()
-					.post()
-					.uri("http://servlet")
-					.contentType(MediaType.APPLICATION_JSON)
-					.bodyValue(new PossibleFileSizeRequestBody(UUID.randomUUID()))
-					.accept(MediaType.APPLICATION_JSON)
-					.retrieve()
-					.bodyToMono(PossibleFileSizeResponseBody.class)
-					.block();
-			Metrics.gauge("experiment.servlet.client.hashSize", response.hashSize);
-			Metrics.gauge("experiment.servlet.client.gZipSize", response.gZipSize);
-		}
-	}
+    private Mono<Integer> deleteAllPreviousChallenges() {
+        return webClient
+                .delete()
+                .uri("challenges")
+                .retrieve()
+                .bodyToMono(Integer.class)
+                .doOnError(error -> log.error("error while deleting challenge", error))
+                .doOnNext(nonce -> log.info("challenge is deleted"));
+    }
+
+    private Mono<AuthenticationChallenge> askForChallengeAndUseIt() {
+        return webClient
+                .post()
+                .uri("challenges")
+                .retrieve()
+                .bodyToMono(AuthenticationChallenge.class)
+                .doOnError(error -> log.error("error while asking for a challenge", error))
+                .flatMap(challenges -> webClient
+                        .post()
+                        .uri("challenges/{nonce}/response", challenges.nonce())
+                        .bodyValue(new ChallengeResponse(challenges.nonce(), challenges.nonce()))
+                        .retrieve()
+                        .bodyToMono(AuthenticationChallenge.class)
+                        .doOnError(error -> log.error("error while signing challenges {}", challenges, error))
+                )
+                .doOnNext(challenges -> Metrics.counter("reactiveland_experiment_servlet_challenge_round_counter").increment());
+    }
 }

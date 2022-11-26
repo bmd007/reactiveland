@@ -1,58 +1,73 @@
 server:
-    port: 8001
+  port: 8001
 
 management:
-    health:
-        defaults.enabled: true
-        diskspace.enabled: false
-    endpoints:
-        web:
-            base-path: /
-            exposure.include: "*"
-    endpoint:
-        prometheus:
-            enabled: true
-        health:
-            enabled: true
-            show-details: never
-        auditevents.enabled: false
-    metrics:
-        tags:
-            application: ${spring.application.name}
-            enable.jvm: true
-            enable.jvm.gc.pause: true
-            enable.jvm.memory: true
-            enable.jvm.threads: true
-            enable.process: true
-            enable.process.files: true
-            enable.http: true
-            enable.http.server.requests: true
-            enable.logback: true
-            enable.system: true
+  health:
+    defaults.enabled: true
+    diskspace.enabled: false
+  endpoints:
+    web:
+      base-path: /
+      exposure.include: "*"
+  endpoint:
     prometheus:
-        metrics:
-            export:
-                enabled: true
+      enabled: true
+    health:
+      enabled: true
+      show-details: never
+    auditevents.enabled: false
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      enable.jvm: true
+      enable.jvm.gc.pause: true
+      enable.jvm.memory: true
+      enable.jvm.threads: true
+      enable.process: true
+      enable.process.files: true
+      enable.http: true
+      enable.http.server.requests: true
+      enable.logback: true
+      enable.system: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 
 spring:
-    main:
-        web-application-type: servlet
-    config:
-        import: optional:consul:consul:8500
-    application:
-        name: servlet
-    cloud:
-        consul:
-            discovery:
-                prefer-ip-address: true
-                health-check-path: /health
-            host: consul
+  main:
+    web-application-type: servlet
+  config:
+    import: optional:consul:consul:8500
+  application:
+    name: servlet
+  cloud:
+    consul:
+      discovery:
+        prefer-ip-address: true
+        health-check-path: /health
+      host: consul
+
+
+  jpa:
+    database: H2
+    driverClassName: org.h2.Driver
+    url: "jdbc:h2:nioMemFS:wonderSeekers;DB_CLOSE_DELAY=-1;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL;INIT=CREATE SCHEMA IF NOT EXISTS public;DATABASE_TO_UPPER=false"
+
+
+
+#    flyway:
+#        locations: classpath:db/migration
+
+
+
+
 ---
 spring:
-    config:
-        activate:
-            on-profile: local
-        import: optional:consul:localhost:8500
-    cloud:
-        consul:
-            host: localhost
+  config:
+    activate:
+      on-profile: local
+    import: optional:consul:localhost:8500
+  cloud:
+    consul:
+      host: localhost

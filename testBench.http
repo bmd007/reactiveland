@@ -1,6 +1,5 @@
-POST http://localhost:8001
-Content-Type: application/json
+GET http://localhost:8001/challenges/ea550857-e911-4724-b0f8-b56788f06e5d
 
-{
-  "id": "c43a64b4-c665-4df7-9da3-274d4ab65e6e"
-}
+###
+POST http://localhost:8001/challenges
+

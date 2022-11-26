@@ -1,0 +1,17 @@
+{
+	"ulid": "01GJRQ50SE1H48465MBTX9CX9N",
+	"minTime": 1669413582605,
+	"maxTime": 1669413600000,
+	"stats": {
+		"numSamples": 205,
+		"numSeries": 104,
+		"numChunks": 104
+	},
+	"compaction": {
+		"level": 1,
+		"sources": [
+			"01GJRQ50SE1H48465MBTX9CX9N"
+		]
+	},
+	"version": 1
+}
