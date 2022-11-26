@@ -1,4 +1,4 @@
-POST http://localhost:8001/challenges
+POST http://localhost:8003/challenges
 ###
 POST http://localhost:8003/challenges
 

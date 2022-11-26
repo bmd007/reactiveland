@@ -141,7 +141,7 @@ public class AuthenticationChallengeResource {
         return repository.findById(id)
                 .map(AuthenticationChallenge::capture)
                 .map(repository::save)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "challenge not found"));
+                .orElseThrow(() -> NOT_FOUND_OR_DEAD_UNAUTHORIZED_EXCEPTION);
     }
 
     @DeleteMapping

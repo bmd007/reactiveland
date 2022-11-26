@@ -1,4 +1,4 @@
 package reactiveland.experiment.webflux;
 
-record ChallengeResponse(String hashedSignedValue, String data) {
+record ChallengeResponse(String jwt) {
 }
