@@ -30,18 +30,20 @@ dependencyManagement {
 	}
 }
 
-repositories {
-	mavenCentral()
-}
-
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-
 	implementation "org.springframework.cloud:spring-cloud-starter-consul-config"
 	implementation "org.springframework.cloud:spring-cloud-starter-consul-discovery"
 	implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.springframework:spring-jdbc'
+	compileOnly 'org.projectlombok:lombok'
+	implementation 'com.h2database:h2'
+	runtimeOnly 'io.r2dbc:r2dbc-h2'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

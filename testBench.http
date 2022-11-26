@@ -1,5 +1,5 @@
-GET http://localhost:8001/challenges/ea550857-e911-4724-b0f8-b56788f06e5d
+GET http://localhost:8003/challenges/c2bf3d6e-3866-497b-812c-7fa17fb1fa9c
 
 ###
-POST http://localhost:8001/challenges
+POST http://localhost:8003/challenges
 

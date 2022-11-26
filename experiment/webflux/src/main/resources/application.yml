@@ -1,58 +1,76 @@
 server:
-    port: 8003
+  port: 8003
 
 management:
-    health:
-        defaults.enabled: true
-        diskspace.enabled: false
-    endpoints:
-        web:
-            base-path: /
-            exposure.include: "*"
-    endpoint:
-        prometheus:
-            enabled: true
-        health:
-            enabled: true
-            show-details: never
-        auditevents.enabled: false
-    metrics:
-        tags:
-            application: ${spring.application.name}
-            enable.jvm: true
-            enable.jvm.gc.pause: true
-            enable.jvm.memory: true
-            enable.jvm.threads: true
-            enable.process: true
-            enable.process.files: true
-            enable.http: true
-            enable.http.server.requests: true
-            enable.logback: true
-            enable.system: true
+  health:
+    defaults.enabled: true
+    diskspace.enabled: false
+  endpoints:
+    web:
+      base-path: /
+      exposure.include: "*"
+  endpoint:
     prometheus:
-        metrics:
-            export:
-                enabled: true
+      enabled: true
+    health:
+      enabled: true
+      show-details: never
+    auditevents.enabled: false
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      enable.jvm: true
+      enable.jvm.gc.pause: true
+      enable.jvm.memory: true
+      enable.jvm.threads: true
+      enable.process: true
+      enable.process.files: true
+      enable.http: true
+      enable.http.server.requests: true
+      enable.logback: true
+      enable.system: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 
 spring:
-    main:
-        web-application-type: reactive
-    config:
-        import: optional:consul:consul:8500
-    application:
-        name: webflux
-    cloud:
-        consul:
-            discovery:
-                prefer-ip-address: true
-                health-check-path: /health
-            host: consul
+  main:
+    web-application-type: reactive
+  config:
+    import: optional:consul:consul:8500
+  application:
+    name: webflux
+  cloud:
+    consul:
+      discovery:
+        prefer-ip-address: true
+        health-check-path: /health
+      host: consul
+  flyway:
+    url: "jdbc:h2:mem:authentication_challenge;DB_CLOSE_DELAY=-1;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;"
+    driver-class-name: org.h2.Driver
+    user: sa
+    password:
+    enabled: true
+
+  data:
+    r2dbc:
+      repositories:
+        enabled: true
+
+  r2dbc:
+    driver-class-name: org.h2.Driver
+    url: "r2dbc:h2:mem:///authentication_challenge;DB_CLOSE_DELAY=-1;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;"
+    username: sa
+    password:
+
 ---
 spring:
-    config:
-        activate:
-            on-profile: local
-        import: optional:consul:localhost:8500
-    cloud:
-        consul:
-            host: localhost
+  config:
+    activate:
+      on-profile: local
+    import: optional:consul:localhost:8500
+  cloud:
+    consul:
+      host: localhost
