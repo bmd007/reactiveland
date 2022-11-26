@@ -94,7 +94,7 @@ public class WebfluxClientApplication {
 	@EventListener(ApplicationReadyEvent.class)
 	public void start() {
 			deleteAllPreviousChallenges().block();
-			Flux.range(0, 1000)
+			Flux.range(0, 1000000)
 					.subscribeOn(Schedulers.boundedElastic())
 					.flatMap(ignore -> askForChallenge())
 					.flatMap(this::captureChallenge)
@@ -103,6 +103,7 @@ public class WebfluxClientApplication {
 					.filter(customerId -> !customerId.isEmpty())
 					.doOnError(throwable -> Metrics.counter("reactiveland_experiment_webflux_authentication_error").increment())
 					.doOnNext(ignore -> Metrics.counter("reactiveland_experiment_webflux_one_round_success").increment())
+					.onErrorReturn("ERROR")
 					.subscribe();
 	}
 

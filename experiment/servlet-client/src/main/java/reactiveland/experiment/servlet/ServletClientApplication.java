@@ -15,9 +15,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 
 import static com.nimbusds.jose.JWSAlgorithm.RS256;
 
@@ -95,16 +98,19 @@ public class ServletClientApplication {
     @EventListener(ApplicationReadyEvent.class)
     public void start() {
         deleteAllPreviousChallenges().block();
-        for (int i = 0; i < 1000; i++) {
-            askForChallenge()
-                    .flatMap(this::captureChallenge)
-                    .flatMap(this::respondToChallenge)
-                    .flatMap(this::authenticateUsingChallenge)
-                    .filter(customerId -> !customerId.isEmpty())
-                    .doOnError(throwable -> Metrics.counter("reactiveland_experiment_servlet_authentication_error").increment())
-                    .block();
-            Metrics.counter("reactiveland_experiment_servlet_one_round_success").increment();
-        }
+        Flux.range(0, 1000000)
+                .subscribeOn(Schedulers.boundedElastic())
+                .mapNotNull(ignore -> {
+                    var challenge = askForChallenge().block();
+                    challenge =  captureChallenge(Objects.requireNonNull(challenge)).block();
+                    challenge = respondToChallenge(Objects.requireNonNull(challenge)).block();
+                    return authenticateUsingChallenge(Objects.requireNonNull(challenge)).block();
+                })
+                .filter(customerId -> !customerId.isEmpty())
+                .doOnError(throwable -> Metrics.counter("reactiveland_experiment_webflux_authentication_error").increment())
+                .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_webflux_one_round_success").increment())
+                .onErrorReturn("ERROR")
+                .blockLast();
     }
 
     private Mono<Integer> deleteAllPreviousChallenges() {

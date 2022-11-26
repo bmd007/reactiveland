@@ -77,6 +77,33 @@ services:
     environment:
       SERVICE_IGNORE: any_value
 
+  webflux:
+    container_name: webflux
+    hostname: servlet
+    image: bmd007/reactiveland-experiment-webflux
+    ports:
+      - "8003:8003"
+    depends_on:
+      - consul
+      - prometheus
+      - grafana
+    environment:
+      SERVICE_IGNORE: any_value
+
+  webflux-client:
+    container_name: webflux-client
+    hostname: servlet
+    image: bmd007/reactiveland-experiment-webflux-client
+    ports:
+      - "8004:8004"
+    depends_on:
+      - webflux
+      - consul
+      - prometheus
+      - grafana
+    environment:
+      SERVICE_IGNORE: any_value
+
   # Registrator to register services in consul
   registrator:
     container_name: registrator
