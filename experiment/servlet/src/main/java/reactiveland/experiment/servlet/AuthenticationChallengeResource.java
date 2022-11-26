@@ -117,7 +117,7 @@ public class AuthenticationChallengeResource {
         RSAKey publicKey = JWK.parseFromPEMEncodedObjects(A_CUSTOMER_PUBLIC_KEY).toRSAKey();
         if (!signedJWT.verify(new RSASSAVerifier(publicKey))) {
             log.warn("Invalid signature with JWT {}", challengeResponse.jwt);
-            repository.save(challenge.kill());
+            repository.delete(challenge);
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "invalid signature");
         }
         return repository.save(challenge.sign("RANDOM_CUSTOMER_ID"));
@@ -129,7 +129,7 @@ public class AuthenticationChallengeResource {
                 .filter(AuthenticationChallenge::isAlive)
                 .filter(ch -> SIGNED.equals(ch.state))
                 .orElseThrow(() -> NOT_FOUND_OR_DEAD_UNAUTHORIZED_EXCEPTION);
-        repository.save(challenge.kill());
+        repository.delete(challenge);
         if (!challenge.authenticate(nonce)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "invalid nonce");
         }

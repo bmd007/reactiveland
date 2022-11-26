@@ -50,39 +50,12 @@ services:
     ports:
       - '3000:3000'
 
-#  servlet:
-#    container_name: servlet
-#    hostname: servlet
-#    image: bmd007/reactiveland-experiment-servlet
-#    ports:
-#      - "8001:8001"
-#    depends_on:
-#      - consul
-#      - prometheus
-#      - grafana
-#    environment:
-#      SERVICE_IGNORE: any_value
-
-#  servlet-client:
-#    container_name: servlet-client
-#    hostname: servlet
-#    image: bmd007/reactiveland-experiment-servlet-client
-#    ports:
-#      - "8002:8002"
-#    depends_on:
-#      - servlet
-#      - consul
-#      - prometheus
-#      - grafana
-#    environment:
-#      SERVICE_IGNORE: any_value
-
-  webflux:
-    container_name: webflux
+  servlet:
+    container_name: servlet
     hostname: servlet
-    image: bmd007/reactiveland-experiment-webflux
+    image: bmd007/reactiveland-experiment-servlet
     ports:
-      - "8003:8003"
+      - "8001:8001"
     depends_on:
       - consul
       - prometheus
@@ -90,19 +63,46 @@ services:
     environment:
       SERVICE_IGNORE: any_value
 
-  webflux-client:
-    container_name: webflux-client
+  servlet-client:
+    container_name: servlet-client
     hostname: servlet
-    image: bmd007/reactiveland-experiment-webflux-client
+    image: bmd007/reactiveland-experiment-servlet-client
     ports:
-      - "8004:8004"
+      - "8002:8002"
     depends_on:
-      - webflux
+      - servlet
       - consul
       - prometheus
       - grafana
     environment:
       SERVICE_IGNORE: any_value
+
+#  webflux:
+#    container_name: webflux
+#    hostname: servlet
+#    image: bmd007/reactiveland-experiment-webflux
+#    ports:
+#      - "8003:8003"
+#    depends_on:
+#      - consul
+#      - prometheus
+#      - grafana
+#    environment:
+#      SERVICE_IGNORE: any_value
+
+#  webflux-client:
+#    container_name: webflux-client
+#    hostname: servlet
+#    image: bmd007/reactiveland-experiment-webflux-client
+#    ports:
+#      - "8004:8004"
+#    depends_on:
+#      - webflux
+#      - consul
+#      - prometheus
+#      - grafana
+#    environment:
+#      SERVICE_IGNORE: any_value
 
   # Registrator to register services in consul
   registrator:
