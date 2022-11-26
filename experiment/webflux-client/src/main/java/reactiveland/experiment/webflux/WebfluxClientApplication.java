@@ -94,7 +94,7 @@ public class WebfluxClientApplication {
 	@EventListener(ApplicationReadyEvent.class)
 	public void start() {
 			deleteAllPreviousChallenges().block();
-			Flux.range(0, 1000000)
+			Flux.range(0, 500000)
 					.subscribeOn(Schedulers.boundedElastic())
 					.flatMap(ignore -> askForChallenge())
 					.flatMap(this::captureChallenge)

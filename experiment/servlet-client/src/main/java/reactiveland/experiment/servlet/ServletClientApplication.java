@@ -98,7 +98,7 @@ public class ServletClientApplication {
     @EventListener(ApplicationReadyEvent.class)
     public void start() {
         deleteAllPreviousChallenges().block();
-        Flux.range(0, 1000000)
+        Flux.range(0, 500000)
                 .subscribeOn(Schedulers.boundedElastic())
                 .mapNotNull(ignore -> {
                     var challenge = askForChallenge().block();
