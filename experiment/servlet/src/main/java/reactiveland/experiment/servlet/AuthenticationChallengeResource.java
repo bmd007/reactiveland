@@ -7,7 +7,6 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,19 +18,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.text.ParseException;
-import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-import static reactiveland.experiment.servlet.AuthenticationChallenge.States.AWAITING_CAPTURE;
-import static reactiveland.experiment.servlet.AuthenticationChallenge.States.CAPTURED;
 import static reactiveland.experiment.servlet.AuthenticationChallenge.States.SIGNED;
 
 
@@ -39,11 +30,6 @@ import static reactiveland.experiment.servlet.AuthenticationChallenge.States.SIG
 @RestController
 @RequestMapping("challenges")
 public class AuthenticationChallengeResource {
-
-    private static final Map<AuthenticationChallenge.States, HttpStatus> CHALLENGE_STATE_TO_HTTP_CODE_MAP =
-            Map.of(AWAITING_CAPTURE, HttpStatus.CREATED,
-                    CAPTURED, HttpStatus.ACCEPTED,
-                    SIGNED, HttpStatus.OK);
 
     private static final String A_CUSTOMER_PUBLIC_KEY = """
                 -----BEGIN PUBLIC KEY-----
@@ -64,11 +50,9 @@ public class AuthenticationChallengeResource {
 
     public static final ResponseStatusException NOT_FOUND_OR_DEAD_UNAUTHORIZED_EXCEPTION = new ResponseStatusException(HttpStatus.UNAUTHORIZED, "challenge not found or dead");
 
-    private final KeyFactory keyFactory;
     private final AuthenticationChallengeRepository repository;
 
-    public AuthenticationChallengeResource(AuthenticationChallengeRepository repository) throws NoSuchAlgorithmException {
-        this.keyFactory = KeyFactory.getInstance("RSA");
+    public AuthenticationChallengeResource(AuthenticationChallengeRepository repository) {
         this.repository = repository;
     }
 
@@ -78,20 +62,15 @@ public class AuthenticationChallengeResource {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<AuthenticationChallenge> getChallenge(@PathVariable(name = "id") String id) {
+    public AuthenticationChallenge getChallenge(@PathVariable(name = "id") String id) {
         return repository.findById(id)
                 .filter(AuthenticationChallenge::isAlive)
-                .map(authenticationChallenge ->
-                        new ResponseEntity<>(authenticationChallenge,
-                                CHALLENGE_STATE_TO_HTTP_CODE_MAP.get(authenticationChallenge.getState())))
                 .orElseThrow(() -> NOT_FOUND_OR_DEAD_UNAUTHORIZED_EXCEPTION);
     }
 
     @PostMapping
-    public ResponseEntity<AuthenticationChallenge> challengeMachine() {
-        AuthenticationChallenge authenticationChallenge = repository.save(AuthenticationChallenge.createNew());
-        return new ResponseEntity<>(authenticationChallenge,
-                CHALLENGE_STATE_TO_HTTP_CODE_MAP.get(authenticationChallenge.getState()));
+    public AuthenticationChallenge challengeMachine() {
+        return repository.save(AuthenticationChallenge.createNew());
     }
 
     @ResponseStatus(HttpStatus.ACCEPTED)
@@ -103,17 +82,6 @@ public class AuthenticationChallengeResource {
         AuthenticationChallenge challenge = repository.findById(id)
                 .filter(AuthenticationChallenge::isAlive)
                 .orElseThrow(() -> NOT_FOUND_OR_DEAD_UNAUTHORIZED_EXCEPTION);
-//        final String deviceId = getClaim(signedJWT, "sub");
-//        EnrollmentEntity enrollmentEntity = enrollmentService.getEnrollment(deviceId).orElseThrow(() -> {
-//            log.warn("Device not found {} {}", kv(KEY_DEVICE_ID, deviceId), kv(KEY_SIGNING_NONCE, signingNonce));
-//            challengeRepository.delete(signingNonce);
-//            throw new NoSuchElementException("Device not found: " + deviceId);
-//        });
-//        if (enrollmentEntity.getExpiresAt().isBefore(ZonedDateTime.now())) {
-//            log.warn("Enrollment expired {} {}", kv(KEY_DEVICE_ID, enrollmentEntity.getDeviceId()), kv(KEY_SIGNING_NONCE, signingNonce));
-//            challengeRepository.delete(signingNonce);
-//            throw new InvalidEnrollmentException(enrollmentEntity.getDeviceId());
-//        }
         RSAKey publicKey = JWK.parseFromPEMEncodedObjects(A_CUSTOMER_PUBLIC_KEY).toRSAKey();
         if (!signedJWT.verify(new RSASSAVerifier(publicKey))) {
             log.warn("Invalid signature with JWT {}", challengeResponse.jwt);
