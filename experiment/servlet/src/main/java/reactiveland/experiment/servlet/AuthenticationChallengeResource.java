@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
@@ -51,30 +52,13 @@ public class AuthenticationChallengeResource {
                 -----END PUBLIC KEY-----
             """.trim();
 
-    private static final String A_CUSTOMER_PRIVATE_KEY = """
-               -----BEGIN RSA PRIVATE KEY-----
-               MIICXQIBAAKBgQCzLkmmMTR4XtbaUd7HJHzoTiAuK99j27MXhBMPL7FDK1nvmqBj
-               vI8MSSIvPjRfYU9wkX5E6xi5DTu/597Pfj0x8q6mb5Cyfm+rx/dzrdBHhfaKHM4j
-               l6o3bk9wt1NOtBDWftPFW5SRh09yjc/TuCMHg4VPwsbFOmA0rHXrEbu/cQIDAQAB
-               AoGAG5HvuyavECZnoMggIzw2C/iZcwFFKjRP5jpoRFnuSIuPFxMPwsjsqdNG80X7
-               AQIUGxoH98rEzxR+MRUYb4zZFWexZZ1kYx37+WcTEQMwA6FyL+htWFU0d6HDfQv0
-               WWYMcoLvsMaQqszVyRW7ceSlhJXqAxZwDHrUA7seb2EmiVECQQD6JM28S4jMEECA
-               /KLY9FQCTpUAoS02mmqmkDJBloBIG7QTwlObIxNFAiqBzdvmqplt55dC6ndIF9mw
-               bM50G+3rAkEAt2At09Dg7c0A+1C46SR8XNGorisdgvVGYH7+s9lOg144rDSWQFse
-               Qkl5tzPWTi9i7b5ktjXLfK28Y9z6GaqFEwJBAPG+L7YRqZrM+gmuHhNdzPKNzyJU
-               ocVrZjailG8ea8tEOrv9yZ7cPvsqJLpdoG9D4BN/BYf94Fkj85W1EbDUbRECQE/U
-               DN8zBVhAcHb3cyf7fDAkDVyU5GoIQLTtVBATP7ysndtJoUcu44NT3SrF5DtxIY4B
-               3nH8BTOnpmWK402dEAUCQQDoQP3Myxb40/S8guVA4MVzAIJ4uq17ZLxA0w4w+dsQ
-               7RA5p4sU4VnZcBUwMYMom+utqFqxNsA/DMGYYJsH50bN
-               -----END RSA PRIVATE KEY-----
-            """.trim();
-    public static final ResponseStatusException NOT_FOUND_OR_DEAD_UNATHOTIZED_EXCEPTION = new ResponseStatusException(HttpStatus.UNAUTHORIZED, "challenge not found or dead");
+    public static final ResponseStatusException NOT_FOUND_OR_DEAD_UNAUTHORIZED_EXCEPTION = new ResponseStatusException(HttpStatus.UNAUTHORIZED, "challenge not found or dead");
 
     private final KeyFactory keyFactory;
     private final AuthenticationChallengeRepository repository;
 
-    public AuthenticationChallengeResource(KeyFactory keyFactory, AuthenticationChallengeRepository repository) {
-        this.keyFactory = keyFactory;
+    public AuthenticationChallengeResource(AuthenticationChallengeRepository repository) throws NoSuchAlgorithmException {
+        this.keyFactory = KeyFactory.getInstance("RSA");
         this.repository = repository;
     }
 
@@ -90,7 +74,7 @@ public class AuthenticationChallengeResource {
                 .map(authenticationChallenge ->
                         new ResponseEntity<>(authenticationChallenge,
                                 CHALLENGE_STATE_TO_HTTP_CODE_MAP.get(authenticationChallenge.getState())))
-                .orElseThrow(() -> NOT_FOUND_OR_DEAD_UNATHOTIZED_EXCEPTION);
+                .orElseThrow(() -> NOT_FOUND_OR_DEAD_UNAUTHORIZED_EXCEPTION);
     }
 
     @PostMapping
@@ -108,7 +92,7 @@ public class AuthenticationChallengeResource {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "jwt is missing claim id"));
         AuthenticationChallenge challenge = repository.findById(id)
                 .filter(AuthenticationChallenge::isAlive)
-                .orElseThrow(() -> NOT_FOUND_OR_DEAD_UNATHOTIZED_EXCEPTION);
+                .orElseThrow(() -> NOT_FOUND_OR_DEAD_UNAUTHORIZED_EXCEPTION);
 //        final String deviceId = getClaim(signedJWT, "sub");
 //        EnrollmentEntity enrollmentEntity = enrollmentService.getEnrollment(deviceId).orElseThrow(() -> {
 //            log.warn("Device not found {} {}", kv(KEY_DEVICE_ID, deviceId), kv(KEY_SIGNING_NONCE, signingNonce));
@@ -135,7 +119,7 @@ public class AuthenticationChallengeResource {
     public String authenticate(@PathVariable String id, @PathVariable String nonce) {
         AuthenticationChallenge challenge = repository.findById(id)
                 .filter(AuthenticationChallenge::isAlive)
-                .orElseThrow(() -> NOT_FOUND_OR_DEAD_UNATHOTIZED_EXCEPTION);
+                .orElseThrow(() -> NOT_FOUND_OR_DEAD_UNAUTHORIZED_EXCEPTION);
         repository.save(challenge.kill());
         if (!challenge.authenticate(nonce)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "invalid nonce or state");
