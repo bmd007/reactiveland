@@ -1,5 +1,6 @@
 package reactiveland.experiment.webflux;
 
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
@@ -84,11 +85,19 @@ public class WebfluxClientApplication {
             """.trim();
 
     private final WebClient webClient;
+    private final JWSSigner signer;
+    private final JWSHeader jwsHeader;
 
-    public WebfluxClientApplication(WebClient.Builder webClientBuilder) {
+    public WebfluxClientApplication(WebClient.Builder webClientBuilder) throws JOSEException {
         this.webClient = webClientBuilder
                 .codecs(codec -> codec.defaultCodecs().maxInMemorySize(16 * 1024 * 1024))
                 .baseUrl("http://webflux")
+                .build();
+        RSAKey signingKey = JWK.parseFromPEMEncodedObjects(A_CUSTOMER_PRIVATE_KEY).toRSAKey();
+        signer = new RSASSASigner(signingKey);
+        jwsHeader = new JWSHeader.Builder(RS256)
+                .keyID(signingKey.getKeyID())
+                .type(JOSEObjectType.JWT)
                 .build();
     }
 
@@ -140,12 +149,6 @@ public class WebfluxClientApplication {
 
     private Mono<AuthenticationChallenge> respondToChallenge(AuthenticationChallenge challenge) {
         try {
-            RSAKey signingKey = JWK.parseFromPEMEncodedObjects(A_CUSTOMER_PRIVATE_KEY).toRSAKey();
-            JWSSigner signer = new RSASSASigner(signingKey);
-            JWSHeader jwsHeader = new JWSHeader.Builder(RS256)
-                    .keyID(signingKey.getKeyID())
-                    .type(JOSEObjectType.JWT)
-                    .build();
             var jwtClaimsSet = new JWTClaimsSet.Builder()
                     .subject("RANDOM_DEVICE_ID")
                     .claim("id", challenge.id())

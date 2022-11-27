@@ -1,5 +1,6 @@
 package reactiveland.experiment.rsocket;
 
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
@@ -84,83 +85,91 @@ public class RsocketClientApplication {
             """.trim();
 
     private final RSocketRequester rSocketRequester;
+    private final JWSSigner signer;
+    private final JWSHeader jwsHeader;
 
-    public RsocketClientApplication(RSocketRequester.Builder rsocketRequesterBuilder) {
+    public RsocketClientApplication(RSocketRequester.Builder rsocketRequesterBuilder) throws JOSEException {
         this.rSocketRequester = rsocketRequesterBuilder.tcp("localhost", 8006);
+        RSAKey signingKey = JWK.parseFromPEMEncodedObjects(A_CUSTOMER_PRIVATE_KEY).toRSAKey();
+        signer = new RSASSASigner(signingKey);
+        jwsHeader = new JWSHeader.Builder(RS256)
+                .keyID(signingKey.getKeyID())
+                .type(JOSEObjectType.JWT)
+                .build();
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void start() {
         deleteAllPreviousChallenges().block();
-        Flux.range(0, 200000)
+        Flux<AuthenticationChallenge> challenges = Flux.range(0, 200000).flatMapSequential(ignore -> askForChallenge());
+        Flux<AuthenticationChallenge> capturedChallenges = captureChallenge(challenges);
+        Flux<AuthenticationChallenge> respondedChallenges = respondToChallenge(capturedChallenges);
+        Flux<String> authenticatedCustomerIds = authenticateUsingChallenge(respondedChallenges);
+        authenticatedCustomerIds.filter(customerId -> !customerId.isEmpty())
                 .subscribeOn(Schedulers.boundedElastic())
-                .flatMap(ignore -> askForChallenge())
-                .flatMap(this::captureChallenge)
-                .flatMap(this::respondToChallenge)
-                .flatMap(this::authenticateUsingChallenge)
-                .filter(customerId -> !customerId.isEmpty())
                 .doOnError(throwable -> Metrics.counter("reactiveland_experiment_rsocket_authentication_error").increment())
                 .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_rsocket_one_round_success").increment())
                 .onErrorReturn("ERROR")
+                .log()
                 .subscribe();
     }
 
     private Mono<Void> deleteAllPreviousChallenges() {
         return rSocketRequester
                 .route("/challenges/delete/all")
-//                .metadata(metadata.address("rsocket-publisher"))
-//                .data("mahdi")
                 .retrieveMono(Void.class)
                 .doOnError(error -> log.error("error while deleting challenge", error))
                 .doOnNext(nonce -> log.info("challenge is deleted"));
     }
 
-    private Mono<AuthenticationChallenge> askForChallenge() {
+    private Flux<AuthenticationChallenge> askForChallenge() {
         return rSocketRequester.route("/challenges/request")
-                .retrieveMono(AuthenticationChallenge.class)
+                .retrieveFlux(AuthenticationChallenge.class)
                 .doOnNext(challenges -> Metrics.counter("reactiveland_experiment_rsocket_challenged").increment())
                 .doOnError(error -> log.error("error while asking for a challenge", error));
     }
 
-    private Mono<AuthenticationChallenge> captureChallenge(AuthenticationChallenge challenge) {
-        return rSocketRequester.route("/challenges/states/captured" )
-                .data(challenge.id())
-                .retrieveMono(AuthenticationChallenge.class)
-                .doOnNext(challenges -> Metrics.counter("reactiveland_experiment_rsocket_captured").increment())
-                .doOnError(error -> log.error("error while capturing challenges {}", challenge, error));
+    private Flux<AuthenticationChallenge> captureChallenge(Flux<AuthenticationChallenge> challenges) {
+        return rSocketRequester.route("/challenges/states/captured")
+                .data(challenges, AuthenticationChallenge.class)
+                .retrieveFlux(AuthenticationChallenge.class)
+                .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_rsocket_captured").increment())
+                .doOnError(error -> log.error("error while capturing a challenge", error));
     }
 
-    private Mono<AuthenticationChallenge> respondToChallenge(AuthenticationChallenge challenge) {
-        try {
-            RSAKey signingKey = JWK.parseFromPEMEncodedObjects(A_CUSTOMER_PRIVATE_KEY).toRSAKey();
-            JWSSigner signer = new RSASSASigner(signingKey);
-            JWSHeader jwsHeader = new JWSHeader.Builder(RS256)
-                    .keyID(signingKey.getKeyID())
-                    .type(JOSEObjectType.JWT)
-                    .build();
-            var jwtClaimsSet = new JWTClaimsSet.Builder()
-                    .subject("RANDOM_DEVICE_ID")
-                    .claim("id", challenge.id())
-                    .build();
-            SignedJWT signedJWT = new SignedJWT(jwsHeader, jwtClaimsSet);
-            signedJWT.sign(signer);
-            return rSocketRequester.route("/challenges/response" .formatted(challenge.id()))
-                    .data(new ChallengeResponse(signedJWT.serialize()))
-                    .retrieveMono(AuthenticationChallenge.class)
-                    .doOnNext(challenges -> Metrics.counter("reactiveland_experiment_rsocket_responded").increment())
-                    .doOnError(error -> log.error("error while signing challenges {}", challenge, error));
-        } catch (Exception e) {
-            return Mono.error(e);
-        }
+    private Flux<AuthenticationChallenge> respondToChallenge(Flux<AuthenticationChallenge> challenges) {
+        Flux<ChallengeResponse> challengeResponses = challenges.map(challenge -> {
+                            var jwtClaimsSet = new JWTClaimsSet.Builder()
+                                    .subject("RANDOM_DEVICE_ID")
+                                    .claim("id", challenge.id())
+                                    .build();
+                            try {
+                                SignedJWT signedJWT = new SignedJWT(jwsHeader, jwtClaimsSet);
+                                signedJWT.sign(signer);
+                                return signedJWT.serialize();
+                            } catch (JOSEException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                )
+                .map(ChallengeResponse::new);
+        return rSocketRequester.route("/challenges/response")
+                .data(challengeResponses, ChallengeResponse.class)
+                .retrieveFlux(AuthenticationChallenge.class)
+                .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_rsocket_responded").increment())
+                .doOnError(error -> log.error("error while signing challenges", error));
     }
 
-    record AuthenticateRequestBody(String challengeId, String nonce){}
+    record AuthenticateRequestBody(String challengeId, String nonce) {
+    }
 
-    private Mono<String> authenticateUsingChallenge(AuthenticationChallenge challenge) {
-        return rSocketRequester.route("/challenges/authenticate" )
-                .data(new AuthenticateRequestBody(challenge.id(), challenge.nonce()))
-                .retrieveMono(String.class)
-                .doOnNext(challenges -> Metrics.counter("reactiveland_experiment_rsocket_authenticated").increment())
-                .doOnError(error -> log.error("error while authenticating using challenges {}", challenge, error));
+    private Flux<String> authenticateUsingChallenge(Flux<AuthenticationChallenge> challenges) {
+        Flux<AuthenticateRequestBody> authenticateRequests =
+                challenges.map(challenge -> new AuthenticateRequestBody(challenge.id(), challenge.nonce()));
+        return rSocketRequester.route("/challenges/authenticate")
+                .data(authenticateRequests, AuthenticateRequestBody.class)
+                .retrieveFlux(String.class)
+                .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_rsocket_authenticated").increment())
+                .doOnError(error -> log.error("error while authenticating using challenges ", error));
     }
 }

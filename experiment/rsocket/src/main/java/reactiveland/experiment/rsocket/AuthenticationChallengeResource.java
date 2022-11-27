@@ -1,9 +1,7 @@
 package reactiveland.experiment.rsocket;
 
-import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.r2dbc.core.R2dbcEntityOperations;
@@ -15,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
 
-import java.security.spec.InvalidKeySpecException;
 import java.text.ParseException;
 import java.util.Optional;
 
@@ -67,55 +65,68 @@ public class AuthenticationChallengeResource {
     }
 
     @MessageMapping("/challenges/request")
-    public Mono<AuthenticationChallenge> challengeMachine() {
-        return dbOps.insert(AuthenticationChallenge.createNew());
+    public Flux<AuthenticationChallenge> challengeMachine() {
+        return Flux.<AuthenticationChallenge>generate(sink -> sink.next(AuthenticationChallenge.createNew()))
+                .flatMap(dbOps::insert);
     }
 
     @MessageMapping("/challenges/response")
-    public Mono<AuthenticationChallenge> challengeResponse(@RequestBody ChallengeResponse challengeResponse) throws ParseException, InvalidKeySpecException, JOSEException {
-        final SignedJWT signedJWT = SignedJWT.parse(challengeResponse.jwt);
-        final String id = Optional.ofNullable(signedJWT.getJWTClaimsSet().getStringClaim("id"))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "jwt is missing claim id"));
-
-        return repository.findById(id)
+    public Flux<AuthenticationChallenge> challengeResponse(@RequestBody Flux<ChallengeResponse> challengeResponses) {
+        return challengeResponses
+                .map(challengeResponse -> {
+                    try {
+                        return SignedJWT.parse(challengeResponse.jwt);
+                    } catch (ParseException e) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad jwt", e);
+                    }
+                })
+                .map(signedJWT -> {
+                    try {
+                        String challengeId = Optional.ofNullable(signedJWT.getJWTClaimsSet().getStringClaim("id")).orElseThrow();
+                        var publicKey = JWK.parseFromPEMEncodedObjects(A_CUSTOMER_PUBLIC_KEY).toRSAKey();
+                        var verifier = new RSASSAVerifier(publicKey);
+                        boolean isJwtVerified = signedJWT.verify(verifier);
+                        return Tuples.of(challengeId, isJwtVerified);
+                    } catch (Exception e) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "jwt is missing claim id", e);
+                    }
+                })
+                .flatMap(challengeIdAndIsVerified -> {
+                    if (Boolean.TRUE.equals(challengeIdAndIsVerified.getT2())) {
+                        return Mono.just(challengeIdAndIsVerified.getT1());
+                    }
+                    return repository.deleteById(challengeIdAndIsVerified.getT1())
+                            .flatMap(ignore ->
+                                    Mono.error(new ResponseStatusException(HttpStatus.FORBIDDEN, "invalid signature")));
+                })
+                .flatMap(repository::findById)
                 .filter(AuthenticationChallenge::isAlive)
                 .switchIfEmpty(NOT_FOUND_OR_DEAD_UNAUTHORIZED_EXCEPTION)
-                .flatMap(challenge -> {
-                    try {
-                        RSAKey publicKey = JWK.parseFromPEMEncodedObjects(A_CUSTOMER_PUBLIC_KEY).toRSAKey();
-                        if (!signedJWT.verify(new RSASSAVerifier(publicKey))) {
-                            log.warn("Invalid signature with JWT {}", challengeResponse.jwt);
-                            return repository.delete(challenge)
-                                    .flatMap(ignore ->
-                                            Mono.error(new ResponseStatusException(HttpStatus.FORBIDDEN, "invalid signature")));
-                        }
-                        return repository.save(challenge.sign("RANDOM_CUSTOMER_ID"));
-                    } catch (JOSEException e) {
-                        return Mono.error(e);
-                    }
-                });
+                .flatMap(challenge -> repository.save(challenge.sign("RANDOM_CUSTOMER_ID")));
     }
 
-    record AuthenticateRequestBody(String challengeId, String nonce){}
+    record AuthenticateRequestBody(String challengeId, String nonce) {
+    }
 
     @MessageMapping("/challenges/authenticate")
-    public Mono<String> authenticate(AuthenticateRequestBody requestBody) {
-        return repository.findById(requestBody.challengeId)
-                .filter(AuthenticationChallenge::isAlive)
-                .filter(ch -> SIGNED.equals(ch.state))
-                .switchIfEmpty(NOT_FOUND_OR_DEAD_UNAUTHORIZED_EXCEPTION)
-                .delayUntil(repository::delete)
-                .filter(challenge -> challenge.authenticate(requestBody.nonce))
+    public Flux<String> authenticate(Flux<AuthenticateRequestBody> requestBodies) {
+        return requestBodies.flatMap(requestBody ->
+                        repository.findById(requestBody.challengeId)
+                                .delayUntil(repository::delete)
+                                .filter(AuthenticationChallenge::isAlive)
+                                .filter(cd -> SIGNED.equals(cd.state))
+                                .switchIfEmpty(NOT_FOUND_OR_DEAD_UNAUTHORIZED_EXCEPTION)
+                                .filter(ch -> ch.authenticate(requestBody.nonce)))
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.FORBIDDEN, "invalid nonce")))
                 .map(AuthenticationChallenge::getCustomerId);
     }
 
     @MessageMapping("/challenges/states/captured")
-    public Mono<AuthenticationChallenge> moveChallengeStateToCaptured(String id) {
-        return repository.findById(id)
+    public Flux<AuthenticationChallenge> moveChallengeStateToCaptured(Flux<String> ids) {
+        return ids.flatMap(repository::findById)
                 .map(AuthenticationChallenge::capture)
-                .flatMap(repository::save)
-                .switchIfEmpty(NOT_FOUND_OR_DEAD_UNAUTHORIZED_EXCEPTION);
+                .switchIfEmpty(NOT_FOUND_OR_DEAD_UNAUTHORIZED_EXCEPTION)
+                .flatMap(repository::save);
     }
 
     @MessageMapping("/challenges/delete/all")
