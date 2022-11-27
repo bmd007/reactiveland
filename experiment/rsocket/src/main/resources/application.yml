@@ -1,5 +1,5 @@
 server:
-  port: 8002
+  port: 8005
 
 management:
   health:
@@ -36,17 +36,44 @@ management:
 
 spring:
   main:
-    web-application-type: servlet
+    web-application-type: reactive
+
   config:
     import: optional:consul:consul:8500
+
   application:
-    name: servlet-client
+    name: rsocket
+
   cloud:
     consul:
       discovery:
         prefer-ip-address: true
         health-check-path: /health
       host: consul
+
+  flyway:
+    url: "jdbc:h2:mem:authentication_challenge;DB_CLOSE_DELAY=-1;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;"
+    driver-class-name: org.h2.Driver
+    user: sa
+    password:
+    enabled: true
+
+  data:
+    r2dbc:
+      repositories:
+        enabled: true
+
+  r2dbc:
+    driver-class-name: org.h2.Driver
+    url: "r2dbc:h2:mem:///authentication_challenge;DB_CLOSE_DELAY=-1;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;"
+    username: sa
+    password:
+
+  rsocket:
+    server:
+      address: 0.0.0.0
+      port: 8006
+      transport: tcp
 ---
 spring:
   config:

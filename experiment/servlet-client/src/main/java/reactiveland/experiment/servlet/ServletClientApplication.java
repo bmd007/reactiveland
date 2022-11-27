@@ -102,7 +102,7 @@ public class ServletClientApplication {
                 .subscribeOn(Schedulers.boundedElastic())
                 .mapNotNull(ignore -> {
                     var challenge = askForChallenge().block();
-                    challenge =  captureChallenge(Objects.requireNonNull(challenge)).block();
+                    challenge = captureChallenge(Objects.requireNonNull(challenge)).block();
                     challenge = respondToChallenge(Objects.requireNonNull(challenge)).block();
                     return authenticateUsingChallenge(Objects.requireNonNull(challenge)).block();
                 })
