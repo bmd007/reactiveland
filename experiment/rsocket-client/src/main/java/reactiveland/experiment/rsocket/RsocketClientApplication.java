@@ -101,7 +101,6 @@ public class RsocketClientApplication {
                 .filter(customerId -> !customerId.isEmpty())
                 .doOnError(throwable -> Metrics.counter("reactiveland_experiment_rsocket_authentication_error").increment())
                 .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_rsocket_one_round_success").increment())
-                .log()
                 .onErrorReturn("ERROR")
                 .subscribe();
     }
