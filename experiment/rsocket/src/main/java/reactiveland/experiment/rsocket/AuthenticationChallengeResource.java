@@ -96,20 +96,22 @@ public class AuthenticationChallengeResource {
                 });
     }
 
-    @MessageMapping("/challenges/{id}/authenticate/{nonce}")
-    public Mono<String> authenticate(@DestinationVariable String id, @DestinationVariable String nonce) {
-        return repository.findById(id)
+    record AuthenticateRequestBody(String challengeId, String nonce){}
+
+    @MessageMapping("/challenges/authenticate")
+    public Mono<String> authenticate(AuthenticateRequestBody requestBody) {
+        return repository.findById(requestBody.challengeId)
                 .filter(AuthenticationChallenge::isAlive)
                 .filter(ch -> SIGNED.equals(ch.state))
                 .switchIfEmpty(NOT_FOUND_OR_DEAD_UNAUTHORIZED_EXCEPTION)
                 .delayUntil(repository::delete)
-                .filter(challenge -> challenge.authenticate(nonce))
+                .filter(challenge -> challenge.authenticate(requestBody.nonce))
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.FORBIDDEN, "invalid nonce")))
                 .map(AuthenticationChallenge::getCustomerId);
     }
 
-    @MessageMapping("/challenges/{id}/states/captured")
-    public Mono<AuthenticationChallenge> moveChallengeStateToCaptured(@DestinationVariable String id) {
+    @MessageMapping("/challenges/states/captured")
+    public Mono<AuthenticationChallenge> moveChallengeStateToCaptured(String id) {
         return repository.findById(id)
                 .map(AuthenticationChallenge::capture)
                 .flatMap(repository::save)

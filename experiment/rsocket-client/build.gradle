@@ -30,7 +30,6 @@ dependencyManagement {
     }
 }
 
-
 repositories {
     mavenCentral()
 }
