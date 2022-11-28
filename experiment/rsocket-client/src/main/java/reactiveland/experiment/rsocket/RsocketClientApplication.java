@@ -16,7 +16,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.cbor.Jackson2CborDecoder;
+import org.springframework.http.codec.cbor.Jackson2CborEncoder;
 import org.springframework.messaging.rsocket.RSocketRequester;
+import org.springframework.messaging.rsocket.RSocketStrategies;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -90,7 +93,13 @@ public class RsocketClientApplication {
     private final JWSHeader jwsHeader;
 
     public RsocketClientApplication() throws JOSEException {
-        this.rSocketRequester = RSocketRequester.builder().tcp("localhost",  8006);
+        RSocketStrategies strategies = RSocketStrategies.builder()
+                .encoders(encoders -> encoders.add(new Jackson2CborEncoder()))
+                .decoders(decoders -> decoders.add(new Jackson2CborDecoder()))
+                .build();
+        this.rSocketRequester = RSocketRequester.builder()
+                .rsocketStrategies(strategies)
+                .tcp("localhost",  8006);
         RSAKey signingKey = JWK.parseFromPEMEncodedObjects(A_CUSTOMER_PRIVATE_KEY).toRSAKey();
         signer = new RSASSASigner(signingKey);
         jwsHeader = new JWSHeader.Builder(RS256)
