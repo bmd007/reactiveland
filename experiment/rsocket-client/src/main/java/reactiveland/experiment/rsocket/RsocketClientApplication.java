@@ -24,6 +24,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.function.Function;
+
 import static com.nimbusds.jose.JWSAlgorithm.RS256;
 
 @Slf4j
@@ -111,7 +113,7 @@ public class RsocketClientApplication {
     @EventListener(ApplicationReadyEvent.class)
     public void start() {
         deleteAllPreviousChallenges().block();
-        Flux<AuthenticationChallenge> challenges = askForChallenge().take(200000);
+        Flux<AuthenticationChallenge> challenges = askForChallenge();
         Flux<AuthenticationChallenge> capturedChallenges = captureChallenge(challenges);
         Flux<AuthenticationChallenge> respondedChallenges = respondToChallenge(capturedChallenges);
         Flux<String> authenticatedCustomerIds = authenticateUsingChallenge(respondedChallenges);
@@ -121,6 +123,7 @@ public class RsocketClientApplication {
                 .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_rsocket_one_round_success").increment())
                 .doOnError(error -> log.error("terminal error", error))
                 .onErrorReturn("ERROR")
+                .take(50000)
                 .subscribe();
     }
 
@@ -137,7 +140,11 @@ public class RsocketClientApplication {
         return rSocketRequester.route("/challenges/request")
                 .retrieveFlux(AuthenticationChallenge.class)
                 .doOnNext(challenges -> Metrics.counter("reactiveland_experiment_rsocket_challenged").increment())
-                .doOnError(error -> log.error("error while asking for a challenge", error));
+                .doOnError(error -> log.error("error while asking for a challenge", error))
+                .buffer(5)
+                .log()
+                .flatMapIterable(Function.identity())
+                .share();
     }
 
     record CaptureRequestBody(String id){}
@@ -145,12 +152,14 @@ public class RsocketClientApplication {
     private Flux<AuthenticationChallenge> captureChallenge(Flux<AuthenticationChallenge> challenges) {
         Flux<CaptureRequestBody> captureRequestBodies = challenges
                 .map(AuthenticationChallenge::id)
-                .map(CaptureRequestBody::new);
+                .map(CaptureRequestBody::new)
+                .share();
         return rSocketRequester.route("/challenges/states/captured")
                 .data(captureRequestBodies, CaptureRequestBody.class)
                 .retrieveFlux(AuthenticationChallenge.class)
                 .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_rsocket_captured").increment())
-                .doOnError(error -> log.error("error while capturing a challenge", error));
+                .doOnError(error -> log.error("error while capturing a challenge", error))
+                .share();
     }
 
     private Flux<AuthenticationChallenge> respondToChallenge(Flux<AuthenticationChallenge> challenges) {
@@ -168,12 +177,14 @@ public class RsocketClientApplication {
                             }
                         }
                 )
-                .map(ChallengeResponse::new);
+                .map(ChallengeResponse::new)
+                .share();
         return rSocketRequester.route("/challenges/response")
                 .data(challengeResponses, ChallengeResponse.class)
                 .retrieveFlux(AuthenticationChallenge.class)
                 .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_rsocket_responded").increment())
-                .doOnError(error -> log.error("error while signing challenges", error));
+                .doOnError(error -> log.error("error while signing challenges", error))
+                .share();
     }
 
     record AuthenticateRequestBody(String challengeId, String nonce) {
@@ -181,11 +192,13 @@ public class RsocketClientApplication {
 
     private Flux<String> authenticateUsingChallenge(Flux<AuthenticationChallenge> challenges) {
         Flux<AuthenticateRequestBody> authenticateRequests =
-                challenges.map(challenge -> new AuthenticateRequestBody(challenge.id(), challenge.nonce()));
+                challenges.map(challenge -> new AuthenticateRequestBody(challenge.id(), challenge.nonce()))
+                        .share();
         return rSocketRequester.route("/challenges/authenticate")
                 .data(authenticateRequests, AuthenticateRequestBody.class)
                 .retrieveFlux(String.class)
                 .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_rsocket_authenticated").increment())
-                .doOnError(error -> log.error("error while authenticating using challenges ", error));
+                .doOnError(error -> log.error("error while authenticating using challenges ", error))
+                .share();
     }
 }

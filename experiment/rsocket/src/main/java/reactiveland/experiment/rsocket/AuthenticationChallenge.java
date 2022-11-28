@@ -46,7 +46,7 @@ public class AuthenticationChallenge {
                     .expiresAt(Instant.now().plusSeconds(300))
                     .build();
         }
-        throw new IllegalStateException("wrong state transition is requested. Only AWAITING_CAPTURE challenges can be CAPTURED.");
+        throw new IllegalStateException("wrong state transition is requested. Only AWAITING_CAPTURE challenges can be CAPTURED. isAlive:" + isAlive());
     }
 
     public boolean isSingable() {
@@ -65,7 +65,7 @@ public class AuthenticationChallenge {
                     .customerId(customerId)
                     .build();
         }
-        throw new IllegalStateException("wrong state transition is requested.");
+        throw new IllegalStateException("wrong state transition is requested. =>"+ this);
     }
 
     public boolean authenticate(String nonce) {
