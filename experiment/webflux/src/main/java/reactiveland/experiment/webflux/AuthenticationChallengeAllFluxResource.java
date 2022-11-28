@@ -3,6 +3,7 @@ package reactiveland.experiment.webflux;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.SignedJWT;
+import io.micrometer.core.instrument.Metrics;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.r2dbc.core.R2dbcEntityOperations;
 import org.springframework.http.HttpStatus;
@@ -108,7 +109,8 @@ public class AuthenticationChallengeAllFluxResource {
                                 .switchIfEmpty(NOT_FOUND_OR_DEAD_UNAUTHORIZED_EXCEPTION)
                                 .filter(ch -> ch.authenticate(requestBody.nonce)))
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.FORBIDDEN, "invalid nonce")))
-                .map(AuthenticationChallenge::getCustomerId);
+                .map(AuthenticationChallenge::getCustomerId)
+                .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_webflux_allflux_server_ok").increment());
     }
 
     record CaptureRequestBody(String id){}

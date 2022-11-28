@@ -93,7 +93,7 @@ public class WebfluxAllFluxCaller {
                 .build();
 
         deleteAllPreviousChallenges().block();
-        Flux<AuthenticationChallenge> challenges = askForChallenge().take(200000);
+        Flux<AuthenticationChallenge> challenges = askForChallenge();
         Flux<AuthenticationChallenge> capturedChallenges = captureChallenge(challenges);
         Flux<AuthenticationChallenge> respondedChallenges = respondToChallenge(capturedChallenges);
         Flux<String> authenticatedCustomerIds = authenticateUsingChallenge(respondedChallenges);
@@ -123,10 +123,12 @@ public class WebfluxAllFluxCaller {
                 .retrieve()
                 .bodyToFlux(AuthenticationChallenge.class)
                 .doOnNext(challenges -> Metrics.counter("reactiveland_experiment_webflux_allflux_challenged").increment())
-                .doOnError(error -> log.error("error while asking for a challenge", error));
+                .doOnError(error -> log.error("error while asking for a challenge", error))
+                ;
     }
 
-    record CaptureRequestBody(String id){}
+    record CaptureRequestBody(String id) {
+    }
 
     private Flux<AuthenticationChallenge> captureChallenge(Flux<AuthenticationChallenge> challenges) {
         Flux<CaptureRequestBody> captureRequestBodies = challenges
@@ -139,7 +141,8 @@ public class WebfluxAllFluxCaller {
                 .retrieve()
                 .bodyToFlux(AuthenticationChallenge.class)
                 .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_webflux_allflux_captured").increment())
-                .doOnError(error -> log.error("error while capturing challenge", error));
+                .doOnError(error -> log.error("error while capturing challenge", error))
+                ;
     }
 
     private Flux<AuthenticationChallenge> respondToChallenge(Flux<AuthenticationChallenge> challenges) {
@@ -165,7 +168,8 @@ public class WebfluxAllFluxCaller {
                 .retrieve()
                 .bodyToFlux(AuthenticationChallenge.class)
                 .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_webflux_allflux_responded").increment())
-                .doOnError(error -> log.error("error while signing challenges", error));
+                .doOnError(error -> log.error("error while signing challenges", error))
+                ;
     }
 
     record AuthenticateRequestBody(String challengeId, String nonce) {
@@ -181,6 +185,7 @@ public class WebfluxAllFluxCaller {
                 .retrieve()
                 .bodyToFlux(String.class)
                 .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_webflux_allflux_authenticated").increment())
-                .doOnError(error -> log.error("error while authenticating using challenges", error));
+                .doOnError(error -> log.error("error while authenticating using challenges", error))
+                ;
     }
 }
