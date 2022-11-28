@@ -101,7 +101,7 @@ public class RsocketClientApplication {
     @EventListener(ApplicationReadyEvent.class)
     public void start() {
         deleteAllPreviousChallenges().block();
-        Flux<AuthenticationChallenge> challenges = Flux.range(0, 200000).flatMapSequential(ignore -> askForChallenge());
+        Flux<AuthenticationChallenge> challenges = askForChallenge().take(200000);
         Flux<AuthenticationChallenge> capturedChallenges = captureChallenge(challenges);
         Flux<AuthenticationChallenge> respondedChallenges = respondToChallenge(capturedChallenges);
         Flux<String> authenticatedCustomerIds = authenticateUsingChallenge(respondedChallenges);
@@ -109,8 +109,8 @@ public class RsocketClientApplication {
                 .subscribeOn(Schedulers.boundedElastic())
                 .doOnError(throwable -> Metrics.counter("reactiveland_experiment_rsocket_authentication_error").increment())
                 .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_rsocket_one_round_success").increment())
+                .doOnError(error -> log.error("terminal error", error))
                 .onErrorReturn("ERROR")
-                .log()
                 .subscribe();
     }
 
@@ -131,7 +131,7 @@ public class RsocketClientApplication {
 
     private Flux<AuthenticationChallenge> captureChallenge(Flux<AuthenticationChallenge> challenges) {
         return rSocketRequester.route("/challenges/states/captured")
-                .data(challenges, AuthenticationChallenge.class)
+                .data(challenges.map(AuthenticationChallenge::id), String.class)
                 .retrieveFlux(AuthenticationChallenge.class)
                 .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_rsocket_captured").increment())
                 .doOnError(error -> log.error("error while capturing a challenge", error));
