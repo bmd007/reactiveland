@@ -1,4 +1,4 @@
-package reactiveland.experiment.rsocket;
+package reactiveland.experiment.webflux;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
@@ -11,12 +11,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import io.micrometer.core.instrument.Metrics;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.http.MediaType;
-import org.springframework.messaging.rsocket.RSocketRequester;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -24,13 +20,8 @@ import reactor.core.scheduler.Schedulers;
 import static com.nimbusds.jose.JWSAlgorithm.RS256;
 
 @Slf4j
-@SpringBootApplication
-public class RsocketClientApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(RsocketClientApplication.class, args);
-    }
-
+@Service
+public class WebfluxAllFluxCaller {
     private static final String A_CUSTOMER_PRIVATE_KEY = """
                -----BEGIN RSA PRIVATE KEY-----
                MIIJJgIBAAKCAgBKWLo9XZOnDfTZbIYB2fqTWVVkWyx46DQ2/3cEWQIzcCR5MFwL
@@ -85,22 +76,22 @@ public class RsocketClientApplication {
                -----END RSA PRIVATE KEY-----
             """.trim();
 
-    private final RSocketRequester rSocketRequester;
+    private final WebClient webClient;
     private final JWSSigner signer;
     private final JWSHeader jwsHeader;
 
-    public RsocketClientApplication() throws JOSEException {
-        this.rSocketRequester = RSocketRequester.builder().tcp("localhost",  8006);
+    public WebfluxAllFluxCaller(WebClient.Builder webClientBuilder) throws JOSEException {
+        this.webClient = webClientBuilder
+                .codecs(codec -> codec.defaultCodecs().maxInMemorySize(16 * 1024 * 1024))
+                .baseUrl("http://webflux")
+                .build();
         RSAKey signingKey = JWK.parseFromPEMEncodedObjects(A_CUSTOMER_PRIVATE_KEY).toRSAKey();
         signer = new RSASSASigner(signingKey);
         jwsHeader = new JWSHeader.Builder(RS256)
                 .keyID(signingKey.getKeyID())
                 .type(JOSEObjectType.JWT)
                 .build();
-    }
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void start() {
         deleteAllPreviousChallenges().block();
         Flux<AuthenticationChallenge> challenges = askForChallenge().take(200000);
         Flux<AuthenticationChallenge> capturedChallenges = captureChallenge(challenges);
@@ -108,26 +99,30 @@ public class RsocketClientApplication {
         Flux<String> authenticatedCustomerIds = authenticateUsingChallenge(respondedChallenges);
         authenticatedCustomerIds.filter(customerId -> !customerId.isEmpty())
                 .subscribeOn(Schedulers.boundedElastic())
-                .doOnError(throwable -> Metrics.counter("reactiveland_experiment_rsocket_authentication_error").increment())
-                .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_rsocket_one_round_success").increment())
+                .doOnError(throwable -> Metrics.counter("reactiveland_experiment_webflux_allflux_authentication_error").increment())
+                .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_webflux_allflux_one_round_success").increment())
                 .doOnError(error -> log.error("terminal error", error))
                 .onErrorReturn("ERROR")
                 .subscribe();
     }
 
-    private Mono<Void> deleteAllPreviousChallenges() {
-        return rSocketRequester
-                .route("/challenges/delete/all")
-                .metadata(metadataSpec -> metadataSpec.metadata("delete", MediaType.TEXT_PLAIN))
-                .retrieveMono(Void.class)
+    private Mono<Integer> deleteAllPreviousChallenges() {
+        return webClient
+                .delete()
+                .uri("challenges")
+                .retrieve()
+                .bodyToMono(Integer.class)
                 .doOnError(error -> log.error("error while deleting challenge", error))
                 .doOnNext(nonce -> log.info("challenge is deleted"));
     }
 
     private Flux<AuthenticationChallenge> askForChallenge() {
-        return rSocketRequester.route("/challenges/request")
-                .retrieveFlux(AuthenticationChallenge.class)
-                .doOnNext(challenges -> Metrics.counter("reactiveland_experiment_rsocket_challenged").increment())
+        return webClient
+                .post()
+                .uri("flux/challenges")
+                .retrieve()
+                .bodyToFlux(AuthenticationChallenge.class)
+                .doOnNext(challenges -> Metrics.counter("reactiveland_experiment_webflux_allflux_challenged").increment())
                 .doOnError(error -> log.error("error while asking for a challenge", error));
     }
 
@@ -137,11 +132,14 @@ public class RsocketClientApplication {
         Flux<CaptureRequestBody> captureRequestBodies = challenges
                 .map(AuthenticationChallenge::id)
                 .map(CaptureRequestBody::new);
-        return rSocketRequester.route("/challenges/states/captured")
-                .data(captureRequestBodies, CaptureRequestBody.class)
-                .retrieveFlux(AuthenticationChallenge.class)
-                .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_rsocket_captured").increment())
-                .doOnError(error -> log.error("error while capturing a challenge", error));
+        return webClient
+                .post()
+                .uri("flux/challenges/states/captured")
+                .body(captureRequestBodies, CaptureRequestBody.class)
+                .retrieve()
+                .bodyToFlux(AuthenticationChallenge.class)
+                .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_webflux_allflux_captured").increment())
+                .doOnError(error -> log.error("error while capturing challenge", error));
     }
 
     private Flux<AuthenticationChallenge> respondToChallenge(Flux<AuthenticationChallenge> challenges) {
@@ -160,10 +158,13 @@ public class RsocketClientApplication {
                         }
                 )
                 .map(ChallengeResponse::new);
-        return rSocketRequester.route("/challenges/response")
-                .data(challengeResponses, ChallengeResponse.class)
-                .retrieveFlux(AuthenticationChallenge.class)
-                .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_rsocket_responded").increment())
+        return webClient
+                .post()
+                .uri("flux/challenges/response")
+                .body(challengeResponses, ChallengeResponse.class)
+                .retrieve()
+                .bodyToFlux(AuthenticationChallenge.class)
+                .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_webflux_allflux_responded").increment())
                 .doOnError(error -> log.error("error while signing challenges", error));
     }
 
@@ -173,10 +174,13 @@ public class RsocketClientApplication {
     private Flux<String> authenticateUsingChallenge(Flux<AuthenticationChallenge> challenges) {
         Flux<AuthenticateRequestBody> authenticateRequests =
                 challenges.map(challenge -> new AuthenticateRequestBody(challenge.id(), challenge.nonce()));
-        return rSocketRequester.route("/challenges/authenticate")
-                .data(authenticateRequests, AuthenticateRequestBody.class)
-                .retrieveFlux(String.class)
-                .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_rsocket_authenticated").increment())
-                .doOnError(error -> log.error("error while authenticating using challenges ", error));
+        return webClient
+                .post()
+                .uri("flux/challenges/authenticate")
+                .body(authenticateRequests, AuthenticateRequestBody.class)
+                .retrieve()
+                .bodyToFlux(String.class)
+                .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_webflux_allflux_authenticated").increment())
+                .doOnError(error -> log.error("error while authenticating using challenges", error));
     }
 }

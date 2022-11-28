@@ -50,8 +50,7 @@ public class AuthenticationChallenge {
                     .expiresAt(Instant.now().plusSeconds(300))
                     .build();
         }
-        killMutable();
-        throw new IllegalStateException("DEAD or wrong state transition is requested. Only AWAITING_CAPTURE challenges can be CAPTURED.");
+        throw new IllegalStateException("wrong state transition is requested. Only AWAITING_CAPTURE challenges can be CAPTURED.");
     }
 
     public boolean isSingable() {
@@ -70,16 +69,7 @@ public class AuthenticationChallenge {
                     .customerId(customerId)
                     .build();
         }
-        killMutable();
-        throw new IllegalStateException("DEAD or wrong state transition is requested.");
-    }
-
-    private void killMutable() {
-        this.state = States.DEAD;
-    }
-
-    public AuthenticationChallenge kill() {
-        return toBuilder().state(States.DEAD).expiresAt(Instant.EPOCH).build();
+        throw new IllegalStateException("wrong state transition is requested.");
     }
 
     public boolean authenticate(String nonce) {
@@ -87,11 +77,11 @@ public class AuthenticationChallenge {
     }
 
     public boolean isAlive() {
-        return Instant.now().isBefore(this.expiresAt) && !state.equals(States.DEAD);
+        return Instant.now().isBefore(this.expiresAt);
     }
 
     public enum States {
-        AWAITING_CAPTURE, CAPTURED, SIGNED, DEAD
+        AWAITING_CAPTURE, CAPTURED, SIGNED
     }
 
 }

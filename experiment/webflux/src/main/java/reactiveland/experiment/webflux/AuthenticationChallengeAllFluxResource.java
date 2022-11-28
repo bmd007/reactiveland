@@ -1,4 +1,4 @@
-package reactiveland.experiment.rsocket;
+package reactiveland.experiment.webflux;
 
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jwk.JWK;
@@ -6,10 +6,11 @@ import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.r2dbc.core.R2dbcEntityOperations;
 import org.springframework.http.HttpStatus;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -18,11 +19,12 @@ import reactor.util.function.Tuples;
 import java.text.ParseException;
 import java.util.Optional;
 
-import static reactiveland.experiment.rsocket.AuthenticationChallenge.States.SIGNED;
+import static reactiveland.experiment.webflux.AuthenticationChallenge.States.SIGNED;
 
 @Slf4j
-@Controller
-public class AuthenticationChallengeResource {
+@RestController
+@RequestMapping("flux/challenges")
+public class AuthenticationChallengeAllFluxResource {
 
     private static final String A_CUSTOMER_PUBLIC_KEY = """
                 -----BEGIN PUBLIC KEY-----
@@ -47,30 +49,18 @@ public class AuthenticationChallengeResource {
     private final AuthenticationChallengeRepository repository;
     private final R2dbcEntityOperations dbOps;
 
-    public AuthenticationChallengeResource(AuthenticationChallengeRepository repository, R2dbcEntityOperations dbOps) {
+    public AuthenticationChallengeAllFluxResource(AuthenticationChallengeRepository repository, R2dbcEntityOperations dbOps) {
         this.dbOps = dbOps;
         this.repository = repository;
     }
 
-    @MessageMapping("/challenges")
-    public Flux<AuthenticationChallenge> getChallenges() {
-        return repository.findAll();
-    }
-
-    @MessageMapping("/challenges/{id}")
-    public Mono<AuthenticationChallenge> getChallenge(@DestinationVariable String id) {
-        return repository.findById(id)
-                .filter(AuthenticationChallenge::isAlive)
-                .switchIfEmpty(NOT_FOUND_OR_DEAD_UNAUTHORIZED_EXCEPTION);
-    }
-
-    @MessageMapping("/challenges/request")
+    @PostMapping
     public Flux<AuthenticationChallenge> challengeMachine() {
         return Flux.<AuthenticationChallenge>generate(sink -> sink.next(AuthenticationChallenge.createNew()))
                 .flatMap(dbOps::insert);
     }
 
-    @MessageMapping("/challenges/response")
+    @PostMapping( "response")
     public Flux<AuthenticationChallenge> challengeResponse(@RequestBody Flux<ChallengeResponse> challengeResponses) {
         return challengeResponses
                 .map(challengeResponse -> {
@@ -108,8 +98,8 @@ public class AuthenticationChallengeResource {
     record AuthenticateRequestBody(String challengeId, String nonce) {
     }
 
-    @MessageMapping("/challenges/authenticate")
-    public Flux<String> authenticate(Flux<AuthenticateRequestBody> requestBodies) {
+    @PostMapping("authenticate")
+    public Flux<String> authenticate(@RequestBody Flux<AuthenticateRequestBody> requestBodies) {
         return requestBodies.flatMap(requestBody ->
                         repository.findById(requestBody.challengeId)
                                 .delayUntil(repository::delete)
@@ -120,21 +110,17 @@ public class AuthenticationChallengeResource {
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.FORBIDDEN, "invalid nonce")))
                 .map(AuthenticationChallenge::getCustomerId);
     }
+
     record CaptureRequestBody(String id){}
 
-    @MessageMapping("/challenges/states/captured")
-    public Flux<AuthenticationChallenge> moveChallengeStateToCaptured(Flux<CaptureRequestBody> ids) {
-        return ids
+    @PostMapping("states/captured")
+    public Flux<AuthenticationChallenge> moveChallengeStateToCaptured(@RequestBody Flux<CaptureRequestBody> requestBodies) {
+        return requestBodies
                 .map(CaptureRequestBody::id)
                 .flatMap(repository::findById)
                 .map(AuthenticationChallenge::capture)
                 .switchIfEmpty(NOT_FOUND_OR_DEAD_UNAUTHORIZED_EXCEPTION)
                 .flatMap(repository::save);
-    }
-
-    @MessageMapping("/challenges/delete/all")
-    public void deleteAll() {
-        repository.deleteAll().subscribe();
     }
 
     record ChallengeResponse(String jwt) {
