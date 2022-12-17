@@ -21,7 +21,7 @@ repositories {
 }
 
 ext {
-    set('springCloudVersion', "2022.0.0-RC2")
+    set('springCloudVersion', "2022.0.0")
 }
 
 dependencyManagement {
