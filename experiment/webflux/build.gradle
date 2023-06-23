@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.1.1'
     id 'io.spring.dependency-management' version '1.1.0'
-    id 'org.graalvm.buildtools.native' version '0.9.19'
+    id 'org.graalvm.buildtools.native' version '0.9.23'
 }
 
 group = 'reactiveland.experiment'
@@ -21,7 +21,7 @@ repositories {
 }
 
 ext {
-    set('springCloudVersion', "2022.0.0")
+    set('springCloudVersion', "2022.0.3")
 }
 
 dependencyManagement {
@@ -42,7 +42,7 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     implementation 'com.h2database:h2'
     runtimeOnly 'io.r2dbc:r2dbc-h2'
-    implementation 'com.nimbusds:nimbus-jose-jwt:9.28'
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.31'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
