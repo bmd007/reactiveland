@@ -92,14 +92,12 @@ public class WebfluxAllFluxCaller {
                 .type(JOSEObjectType.JWT)
                 .build();
 
-        deleteAllPreviousChallenges().then(
-                Mono.fromRunnable(() -> {
-                    Flux<AuthenticationChallenge> challenges = askForChallenge();
-                    Flux<AuthenticationChallenge> capturedChallenges = captureChallenge(challenges);
-                    Flux<AuthenticationChallenge> respondedChallenges = respondToChallenge(capturedChallenges);
-                    Flux<String> authenticatedCustomerIds = authenticateUsingChallenge(respondedChallenges);
-                    authenticatedCustomerIds.filter(customerId -> !customerId.isEmpty());
-                }))
+        deleteAllPreviousChallenges().block();
+        Flux<AuthenticationChallenge> challenges = askForChallenge();
+        Flux<AuthenticationChallenge> capturedChallenges = captureChallenge(challenges);
+        Flux<AuthenticationChallenge> respondedChallenges = respondToChallenge(capturedChallenges);
+        Flux<String> authenticatedCustomerIds = authenticateUsingChallenge(respondedChallenges);
+        authenticatedCustomerIds.filter(customerId -> !customerId.isEmpty())
                 .subscribeOn(Schedulers.boundedElastic())
                 .doOnError(throwable -> Metrics.counter("reactiveland_experiment_webflux_allflux_authentication_error").increment())
                 .doOnNext(ignore -> Metrics.counter("reactiveland_experiment_webflux_allflux_one_round_success").increment())
