@@ -21,12 +21,12 @@ Boom, the app now tells Alice and Bob that they have mutually liked each other (
  - Alice likes Bod
  - Alice dislikes John
  - Bob likes Alice (likes back)
- - Alice and Bob are matched
+- Alice and Bob are matched
 
-       *Available candidates are people who are doing the same, swiping. 
-       There can be a time difference between when each person starts swiping. But as long as it's not too different, it should still be considered availablity.
-       Other parameters, like The location from which has started swiping, can be used to limit who is available to whom. 
-       In this post, we skip all of them as they can be handled without introducing a change to the overall system design.
+Available candidates are people who are doing the same, swiping. 
+There can be a time difference between when each person starts swiping. But as long as it's not too different, it should still be considered availablity.
+Other parameters, like The location from which has started swiping, can be used to limit who is available to whom. 
+In this post, we skip all of them as they can be handled without introducing a change to the overall system design.
 
 
  - Bob is liked by Alice (passive version of Alice like Bob event)
@@ -44,9 +44,9 @@ Boom, the app now tells Alice and Bob that they have mutually liked each other (
         This event can be considered an `update`. Which means we don't care about keeping a history of it. We just care about the latest version of it.
  - SwiperLikedAnotherSwiper(String liker, String likee) ===> key: liker
  - SwiperIsLikedByAnotherSwiper(String likee, String liker) ===> key: likee
- - SwiperIsMatchedWithAnotherSwiper(String matchPartyA, String matchPartyB) ===> key: matchPartyA
+- SwiperIsMatchedWithAnotherSwiper(String matchPartyA, String matchPartyB) ===> key: matchPartyA
     
-        All the mentions of `swiper`, `likee`, `liker` and `matchParty` in the events above, are user identifier of the user playing the corresponding role.
+All the mentions of `swiper`, `likee`, `liker` and `matchParty` in the events above, are user identifier of the user playing the corresponding role.
 
 ### KTables
  - (Global) AvaiableSwippers: created using SwiperStartedLookingForPartner events. Serves who is available atm.
