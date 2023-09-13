@@ -3,9 +3,11 @@
 ## How to capture two people liking each other, only with events, in order to announce them matched? (Event-Driven match making)
 
 ### Story
-Alice, Bob and John are schrolling through a match making app, looking at people living close enough to them. Liking and unliking them.
-At some point, Alice likes Bob. Later Alice dislikes John.
-A few minutes later, Bob likes Alice too. Boom, the app now tells Alice and Bob that they have mutually likes each other (matched).
+Alice, Bob and John are scrolling through a match making app, looking at people living close enough to them, liking and unliking them.
+At some point, Alice likes Bob.
+Later Alice dislikes John.
+A few minutes later, Bob likes Alice too.
+Boom, the app now tells Alice and Bob that they have mutually liked each other (matched).
 
 ### Context
  - All we have are events and state stores.

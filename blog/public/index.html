@@ -10,7 +10,93 @@
 </head>
 <body>
 
-<H2>Architectural though experiments</H2>
+<h1 id="events-my-dear-boy-events-">Events, my dear boy, events.</h1>
+<h2 id="how-to-capture-two-people-liking-each-other-only-with-events-in-order-to-announce-them-matched-event-driven-match-making-">How to capture two people liking each other, only with events, in order to announce them matched? (Event-Driven match making)</h2>
+<h3 id="story">Story</h3>
+<p>Alice, Bob and John are scrolling through a match making app, looking at people living close enough to them, liking and unliking them.
+    At some point, Alice likes Bob.
+    Later Alice dislikes John.
+    A few minutes later, Bob likes Alice too.
+    Boom, the app now tells Alice and Bob that they have mutually liked each other (matched).</p>
+<h3 id="context">Context</h3>
+<ul>
+    <li>All we have are events and state stores.</li>
+    <li>We are going to use KafkaStreams and stream processing notions. </li>
+    <li>I assume you know enough about them, apart from general knowledge of Event-Driven systems.</li>
+    <li>This post is not about stream processing being a good or bad approach here. Rather, a thought experiment on Event-Driven systems.</li>
+</ul>
+<h3 id="event-storming">Event storming</h3>
+<ul>
+    <li>Alice is swiping left and right through available* people.</li>
+    <li>Alice likes Bod</li>
+    <li>Alice dislikes John</li>
+    <li>Bob likes Alice (likes back)</li>
+    <li><p>Alice and Bob are matched</p>
+        <pre><code>*Available people are people who are doing the same, swiping.
+There can be a time difference between <span class="hljs-keyword">when</span> <span class="hljs-keyword">each</span> person starts swiping. But <span class="hljs-keyword">as</span> <span class="hljs-built_in">long</span> <span class="hljs-keyword">as</span> it<span class="hljs-comment">'s not too different, it should still be considered available.</span>
+Other parameters, <span class="hljs-keyword">like</span> The location <span class="hljs-keyword">from</span> which has started swiping, can be used <span class="hljs-keyword">to</span> limit who <span class="hljs-keyword">is</span> available <span class="hljs-keyword">to</span> whom.
+<span class="hljs-keyword">In</span> this post, we <span class="hljs-keyword">skip</span> all <span class="hljs-keyword">of</span> them <span class="hljs-keyword">as</span> they can be handled without introducing a change <span class="hljs-keyword">to</span> the overall system design.
+</code></pre></li>
+</ul>
+<ul>
+    <li>Bob is liked by Alice (passive version of Alice like Bob event)</li>
+</ul>
+<h3 id="common-language">Common language</h3>
+<ul>
+    <li>People who are using the application and looking for a partner are users of the application.<pre><code> During <span class="hljs-keyword">the</span> <span class="hljs-built_in">time</span> that they are swiping <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> concerned <span class="hljs-keyword">with</span> their matches, we can call them `swiper`.
+ In <span class="hljs-keyword">the</span> context <span class="hljs-keyword">of</span> managing matches, we can come up <span class="hljs-keyword">with</span> <span class="hljs-keyword">a</span> different name. But that part is outside <span class="hljs-keyword">the</span> context <span class="hljs-keyword">of</span> this <span class="hljs-built_in">post</span>.
+</code></pre></li>
+    <li>When a <code>Swiper</code> likes someone, we call him/her <code>Liker</code> . </li>
+    <li>When a <code>Swiper</code> is liked by someone, we call him/her <code>Likee</code> .</li>
+</ul>
+<h3 id="event-definitions">Event definitions</h3>
+<ul>
+    <li>SwiperStartedLookingForPartner(String swiper, location, time, ...) ===&gt; key: swiper</li>
+    <li>SwiperLikedAnotherSwiper(String liker, String likee) ===&gt; key: liker</li>
+    <li>SwiperIsLikedByAnotherSwiper(String likee, String liker) ===&gt; key: likee</li>
+    <li><p>SwiperIsMatchedWithAnotherSwiper(String matchPartyA, String matchPartyB) ===&gt; key: matchPartyA</p>
+        <pre><code> All the mentions <span class="hljs-keyword">of</span> `swiper`, `likee`, `liker` and `matchParty` <span class="hljs-keyword">in</span> the events above, are user identifier <span class="hljs-keyword">of</span> the user playing the corresponding role.
+</code></pre></li>
+</ul>
+<h3 id="ktables">KTables</h3>
+<ul>
+    <li>(Global) AvaiableSwippers: created using SwiperStartedLookingForPartner events. Serves who is available atm.</li>
+    <li>LikeHistory: created using SwiperLikedAnotherSwiper events. For each <code>liker</code>, we will keep a list of users the <code>liker</code> has liked.</li>
+    <li>For each SwiperLikedAnotherSwiper event, publish a SwiperIsLikedByAnotherSwiper. </li>
+    <li>LikedByHistory: Created using SwiperIsLikedByAnotherSwiper events. For each <code>likee</code>, we will keep a list of users the <code>likee</code> has been liked by.</li>
+</ul>
+<h3 id="general-idea">General idea</h3>
+<p>   The only execution that happens in the system is when an event happens.
+    So the triggers for our actions are the events.</p>
+<p>   Match, here, means the following:
+    When Bob likes Alice, there will be a match only when Alice has already liked Bob.
+    We know if Alice has already liked Bob (or not) by looking at LikeHistory.
+    But we can&#39;t randomly look at that table; for each SwiperLikedAnotherSwiper, or in general.
+    We need to look at that table only when there is a possibility of match.
+    Here that possibility exists when Bob likes Alice.
+    So when Bob likes Alice, we use that as a trigger to start checking if Alice has previously liked him too.
+    During our check, we can&#39;t just query the LikeHistory.
+    That would NOT be completely real-time and streaming style, hence the blocking query.
+    What we need is a way to turn that trigger into something else that gives us access to Alice LikeHistory, without a blocking query.
+    One option is to <strong>join</strong> an event (stream) with LikeHistory table.
+    The event key should be Alice so that when join happens, the join operation gets access to Alice&#39;s history of likes.
+    The join operation also needs to know who&#39;s the other party; who to look for inside Alice&#39;s history of likes.
+    The initial trigger was BobLikedAlice event. This event has the wrong key for our join since the key is Bob.
+    However, it has all the information we need to publish a new trigger, AliceIsLikedByBob event.
+    So when we receive it, we just turn it around and publish AliceIsLikedByBob event. The key of this new event is Alice.
+    Now we have the trigger we were looking for with the right key. Let&#39;s join AliceIsLikedByBob event with LikeHistory Ktable.
+    In the join operation, we check if Bob is already liked by Alice. If yes, match. Otherwise, ignore.
+    If matched, we publish two events right away: SwiperIsMatchedWithAnotherSwiper(Alice, Bob) and SwiperIsMatchedWithAnotherSwiper(Bob, Alice)
+    There two events are similar but have different keys. They will fill up the MatchHistory of their corresponding key (user).</p>
+<ol>
+    <li>SwiperLikedAnotherSwiper(Alice, Bob) =&gt; LikeHistory: (Alice[Bob], Bob[])</li>
+    <li>SwiperIsLikedByAnotherSwiper(Bob, Alice) event published</li>
+    <li>SwiperIsLikedByAnotherSwiper(Bob, Alice) joins LikeHistory: (Alice[Bob], Bob[]) ==&gt; Bob like history doesn&#39;t include <code>SwiperIsLikedByAnotherSwiper</code> ==&gt; no match </li>
+    <li>SwiperLikedAnotherSwiper(Bob, Alice) =&gt; LikeHistory: (Alice[Bob], Bob[Alice])</li>
+    <li>SwiperIsLikedByAnotherSwiper(Alice, Bob) event published</li>
+    <li>SwiperIsLikedByAnotherSwiper(Alice, Bob) joins LikeHistory: (Alice[Bob], Bob[Alice]) ==&gt; Bob like history contains Alice.</li>
+    <li>SwiperIsMatchedWithAnotherSwiper(Alice, Bob) and SwiperIsMatchedWithAnotherSwiper(Bob, Alice) are published</li>
+</ol>
 
 
 
