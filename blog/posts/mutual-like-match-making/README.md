@@ -95,4 +95,5 @@ Boom, the app now tells Alice and Bob that they have mutually liked each other (
 #### Liked but no match yet
 ![liked-but-not-matched.png](liked-but-not-matched.png)
 
-
+#### Liked and matched
+![liked-and-machted.png](liked-and-machted.png)
