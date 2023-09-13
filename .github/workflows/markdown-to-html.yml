@@ -18,17 +18,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  converttopdf:
+    name: Build html
     runs-on: ubuntu-latest
     steps:
-      - name: Convert Markdown to HTML
-        uses: natescherer/markdown-to-html-with-github-style-action@v1
+      - uses: actions/checkout@v3
+      - uses: baileyjm02/markdown-to-pdf@v1
         with:
-          path: blog/posts/mutual-like-match-making/README.md
-          outputpath: blog/public
+          input_dir: blog/posts/**
+          output_dir: blog/public
+#          images_dir: docs/images
+          # for example <img src="./images/file-name.png">
+#          image_import: ./images
+          # Default is true, can set to false to only get PDF files
+          build_html: true
+      - uses: actions/upload-artifact@v3
+        with:
+          name: docs
+          path: pdfs
 
       - name: checkout to a temp branch
         run: |
