@@ -2,6 +2,10 @@
 
 ## How to capture two people liking each other, only with events, in order to announce them matched? (Event-Driven match making)
 
+### What do you gain by reading this post?
+If you are generally familiar with Event-Driven systems and KafkaStreams, you will learn about a match making system architectural design. This solution only relies on real-time data and does not involve blocking behavior. Thus follows reactive systems philosophy.
+
+
 ### Story
 Alice, Bob and John are scrolling through a match-making app.
 They are looking at people (candidates) living close enough, liking and unliking them.
