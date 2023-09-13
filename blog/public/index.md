@@ -56,7 +56,7 @@ All the mentions of `swiper`, `likee`, `liker` and `matchParty` in the events ab
  - (Global) AvaiableSwippers: created using SwiperStartedLookingForPartner events. Serves who is available atm.
  - LikeHistory: created using SwiperLikedAnotherSwiper events. For each `liker`, we will keep a list of users the `liker` has liked.
  - For each SwiperLikedAnotherSwiper event, publish a SwiperIsLikedByAnotherSwiper. 
- - LikedByHistory: Created using SwiperIsLikedByAnotherSwiper events. For each `likee`, we will keep a list of users the `likee` has been liked by.
+ - LikedByHistory: created using SwiperIsLikedByAnotherSwiper events. For each `likee`, we will keep a list of users the `likee` has been liked by.
 
 ### General idea
    The only execution that happens in the system is when an event happens.
