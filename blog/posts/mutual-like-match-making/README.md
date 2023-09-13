@@ -3,7 +3,8 @@
 ## How to capture two people liking each other, only with events, in order to announce them matched? (Event-Driven match making)
 
 ### Story
-Alice, Bob and John are scrolling through a match making app, looking at people living close enough to them, liking and unliking them.
+Alice, Bob and John are scrolling through a match-making app.
+They are looking at people (candidates) living close enough, liking and unliking them.
 At some point, Alice likes Bob.
 Later Alice dislikes John.
 A few minutes later, Bob likes Alice too.
@@ -16,14 +17,14 @@ Boom, the app now tells Alice and Bob that they have mutually liked each other (
  - This post is not about stream processing being a good or bad approach here. Rather, a thought experiment on Event-Driven systems.
 
 ### Event storming
- - Alice is swiping left and right through available* people.
+ - Alice is swiping left and right through available* candidates.
  - Alice likes Bod
  - Alice dislikes John
  - Bob likes Alice (likes back)
  - Alice and Bob are matched
 
-       *Available people are people who are doing the same, swiping. 
-       There can be a time difference between when each person starts swiping. But as long as it's not too different, it should still be considered available.
+       *Available candidates are people who are doing the same, swiping. 
+       There can be a time difference between when each person starts swiping. But as long as it's not too different, it should still be considered availablity.
        Other parameters, like The location from which has started swiping, can be used to limit who is available to whom. 
        In this post, we skip all of them as they can be handled without introducing a change to the overall system design.
 
@@ -40,6 +41,7 @@ Boom, the app now tells Alice and Bob that they have mutually liked each other (
 
 ### Event definitions
  - SwiperStartedLookingForPartner(String swiper, location, time, ...) ===> key: swiper
+        This event can be considered an `update`. Which means we don't care about keeping a history of it. We just care about the latest version of it.
  - SwiperLikedAnotherSwiper(String liker, String likee) ===> key: liker
  - SwiperIsLikedByAnotherSwiper(String likee, String liker) ===> key: likee
  - SwiperIsMatchedWithAnotherSwiper(String matchPartyA, String matchPartyB) ===> key: matchPartyA
@@ -86,3 +88,11 @@ Boom, the app now tells Alice and Bob that they have mutually liked each other (
 6. SwiperIsLikedByAnotherSwiper(Alice, Bob) joins LikeHistory: (Alice[Bob], Bob[Alice]) ==> Bob like history contains Alice.
 7. SwiperIsMatchedWithAnotherSwiper(Alice, Bob) and SwiperIsMatchedWithAnotherSwiper(Bob, Alice) are published
  
+### Illustration
+#### Candidate look up 
+![candidate-lookup.png](candidate-lookup.png)
+
+#### Liked but no match yet
+![liked-but-not-matched.png](liked-but-not-matched.png)
+
+
