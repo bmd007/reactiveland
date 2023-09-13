@@ -29,8 +29,8 @@ Boom, the app now tells Alice and Bob that they have mutually liked each other (
 
 Available candidates are people who are doing the same, swiping. 
 There can be a time difference between when each person starts swiping. But as long as it's not too different, it should still be considered availablity.
-Other parameters, like The location from which has started swiping, can be used to limit who is available to whom. 
-In this post, we skip all of them as they can be handled without introducing a change to the overall system design.
+Other parameters, like the location from which swiping has started, can be used to limit who is available to whom. 
+In this post, we kinda skip all of them as they can be handled without introducing a change to the overall system design.
 
 
  - Bob is liked by Alice (passive version of Alice like Bob event)
