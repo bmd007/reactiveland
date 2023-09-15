@@ -94,12 +94,12 @@ All the mentions of `swiper`, `likee`, `liker` and `matchParty` in the events ab
  
 ### Illustration
 #### Candidate look up 
-![candidate-lookup.png](candidate-lookup.png)
+![candidate-lookup.png](resource:assets/candidate-lookup.png)
 
 #### Liked but no match yet
-![liked-but-not-matched.png](liked-but-not-matched.png)
+![liked-but-not-matched.png](resource:assets/liked-but-not-matched.png)
 
 #### Liked and matched
-![liked-and-machted.png](liked-and-machted.png)
+![liked-and-machted.png](resource:assets/liked-and-machted.png)
 
 ### [Sample implementation](https://github.com/bmd007/wonderland/blob/044d20da767415e6c27d0c8088a07062720d67b1/wonder-matcher/src/main/java/wonderland/wonder/matcher/stream/KStreamAndKTableDefinitions.java#L101)
