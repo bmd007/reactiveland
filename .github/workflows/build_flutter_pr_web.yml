@@ -1,0 +1,58 @@
+name: Flutter build for pages
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+        - 'blog/blog-application/**'
+        - '.github/workflows/**'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+        GITHUB_TOKEN: '${{ secrets.BMD_ACCESS_TOKEN_FOR_ACTIONS }}'
+   
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.13.1'
+          channel: 'stable'
+
+      - name: flutter pub get
+        working-directory: ./blog/blog-application
+        run: flutter pub get
+
+      - name: flutter config --enable-web
+        working-directory: ./blog/blog-application
+        run: flutter config --enable-web
+
+      - name: flutter build web
+        working-directory: ./blog/blog-application
+        run: flutter build web --release --base-href /reactiveland/
+
+      - name: copy from flutter build to public folder
+        run: |
+          cp -r ./blog/blog-application/build/web/* ./blog/public/
+
+      - name: checkout to a temp branch
+        run: |
+          git config --global user.email "bmd579@gmail.com"
+          git config --global user.name "Mahdi"
+          git checkout master
+          git pull
+          git checkout -b deployment-to-github-pages
+          git add --all
+          git commit -m "deployment-to-github-pages"
+          git push origin HEAD:deployment-to-github-pages --force
+
+      - name: create pull request
+        run: gh pr merge --auto --rebase --delete-branch $(gh pr create -B master -H deployment-to-github-pages --title 'Merge deployment-to-github-pages into master for github pages' --body 'Created by Github action' --fill)
+        env:
+          GITHUB_TOKEN: ${{ secrets.BMD_ACCESS_TOKEN_FOR_ACTIONS }}
