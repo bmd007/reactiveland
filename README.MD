@@ -25,7 +25,7 @@ Our journey will happen through a series of short lecture (Youtube) followed by 
    - Master branch (called `main`), will contain challenges and their solution answer.
    - If you want challenges without responses, you can check out the commit id in front of each episode added below.
    During each workshop, you should create a branch with a name identifying your group.
-   When done, create a PR using that branch toward master.
+   When done, create a PR using that branch toward main.
    
 
 ### How to use: Use the links below to move to the corresponding directory to each episode.

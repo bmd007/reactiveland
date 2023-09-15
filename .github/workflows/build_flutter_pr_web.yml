@@ -2,7 +2,7 @@ name: Flutter build for pages
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
         - 'blog/blog-application/**'
         - '.github/workflows/**'
@@ -45,7 +45,7 @@ jobs:
         run: |
           git config --global user.email "bmd579@gmail.com"
           git config --global user.name "Mahdi"
-          git checkout master
+          git checkout main
           git pull
           git checkout -b deployment-to-github-pages
           git add --all
@@ -53,6 +53,6 @@ jobs:
           git push origin HEAD:deployment-to-github-pages --force
 
       - name: create pull request
-        run: gh pr merge --auto --rebase --delete-branch $(gh pr create -B master -H deployment-to-github-pages --title 'Merge deployment-to-github-pages into master for github pages' --body 'Created by Github action' --fill)
+        run: gh pr merge --auto --rebase --delete-branch $(gh pr create -B main -H deployment-to-github-pages --title 'Merge deployment-to-github-pages into main for github pages' --body 'Created by Github action' --fill)
         env:
           GITHUB_TOKEN: ${{ secrets.BMD_ACCESS_TOKEN_FOR_ACTIONS }}
