@@ -1,3 +1,4 @@
+import 'package:blog_application/subject_table.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
@@ -29,9 +30,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       initialRoute: '/',
       routes: {
-        '/': (context) =>
+        '/': (context) => const SubjectTableWidget(),
+        '/test route': (context) => const Text('test route'),
+        '/match-making': (context) =>
             displayMarkdown(context, 'event-driven-match-making.md'),
-        '/overview': (context) => const Text('overview'),
       },
       title: 'Reactiveland blog: Mahdi',
       theme: ThemeData(
