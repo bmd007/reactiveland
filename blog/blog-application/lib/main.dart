@@ -27,12 +27,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      initialRoute: '/',
+      routes: {
+        '/': (context) =>
+            displayMarkdown(context, 'event-driven-match-making.md'),
+        '/overview': (context) => const Text('overview'),
+      },
       title: 'Reactiveland blog: Mahdi',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: displayMarkdown(context, 'event-driven-match-making.md'),
     );
   }
 }
