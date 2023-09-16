@@ -71,7 +71,7 @@ class SubjectTableWidget extends StatelessWidget {
                           const Row(
                             children: [
                               Text(
-                                'test-route',
+                                'Test route',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
