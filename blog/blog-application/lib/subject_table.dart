@@ -6,7 +6,9 @@ class SubjectTableWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(centerTitle: true, title: const Text("choose a topic")),
+      appBar: AppBar(
+          centerTitle: true,
+          title: const Text("Mahdi's architectural thoughts")),
       body: Center(
         child: GridView.count(
           crossAxisCount: (MediaQuery.of(context).size.width ~/ 250).toInt(),
