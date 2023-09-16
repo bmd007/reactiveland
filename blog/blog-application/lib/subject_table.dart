@@ -38,7 +38,7 @@ class SubjectTableWidget extends StatelessWidget {
                           const Row(
                             children: [
                               Text(
-                                'Matching making only using events',
+                                'Match making only using events',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
