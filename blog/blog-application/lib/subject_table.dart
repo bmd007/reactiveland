@@ -36,7 +36,7 @@ class SubjectTableWidget extends StatelessWidget {
                           const Row(
                             children: [
                               Text(
-                                'Edit your profile',
+                                'Matching making only using events',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
@@ -53,7 +53,7 @@ class SubjectTableWidget extends StatelessWidget {
             ),
             Card(
               child: GestureDetector(
-                onTap: () => Navigator.of(context).pushNamed('/test'),
+                onTap: () => Navigator.of(context).pushNamed('/test-route'),
                 child: Container(
                   height: 300,
                   decoration:
@@ -71,7 +71,7 @@ class SubjectTableWidget extends StatelessWidget {
                           const Row(
                             children: [
                               Text(
-                                'Find a dance partner',
+                                'test-route',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,

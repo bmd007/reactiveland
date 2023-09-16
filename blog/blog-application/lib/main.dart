@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const SubjectTableWidget(),
-        '/test route': (context) => const Text('test route'),
+        '/test-route': (context) => const Text('test route'),
         '/match-making': (context) =>
             displayMarkdown(context, 'event-driven-match-making.md'),
       },
