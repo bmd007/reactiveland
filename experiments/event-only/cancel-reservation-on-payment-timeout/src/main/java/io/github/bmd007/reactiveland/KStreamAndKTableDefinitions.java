@@ -28,7 +28,7 @@ public class KStreamAndKTableDefinitions {
 
     @PostConstruct
     public void configureStores() {
-        TimeWindows timeWindows = TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(5));
+        TimeWindows timeWindows = TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(2));
         streamsBuilder.stream(Topics.CUSTOMER_EVENTS_TOPIC, CUSTOMER_RESERVED_TABLE_CONSUMED)
                 .groupByKey()
                 .windowedBy(timeWindows)
@@ -37,8 +37,7 @@ public class KStreamAndKTableDefinitions {
                 .foreach((key, value) -> {
                     // Perform actions based on processing time window closure
                     // This gets executed when the window closes based on processing time
-                    System.out.println("Window closed at: " + key.window().end());
-                    System.out.println("Count within window: " + value);
+                    log.info("at {} windows {} closed with value {}", key.window().end(), key.key(), value);
                     // Implement your actions here
                 });
     }
