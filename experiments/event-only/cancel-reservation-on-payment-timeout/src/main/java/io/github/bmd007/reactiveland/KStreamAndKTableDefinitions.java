@@ -37,8 +37,8 @@ public class KStreamAndKTableDefinitions {
                 .foreach((key, value) -> {
                     // Perform actions based on processing time window closure
                     // This gets executed when the window closes based on processing time
-                    log.info("at {} windows {} started and at {} closed with value {}", key.window().startTime(),
-                            key.window().endTime(), key.key(), value);
+                    log.info("key:value = {}:{}", key.key(), value);
+                    log.info("start:stop = {}:{}", key.window().startTime(), key.window().endTime());
                     // Implement your actions here
                 });
     }
