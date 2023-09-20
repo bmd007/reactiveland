@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.UUID;
+import java.time.Duration;
 
 @RestController
 @SpringBootApplication
@@ -27,16 +26,14 @@ public class CancelReservationOnPaymentTimeoutApplication {
 	private KafkaEventProducer kafkaEventProducer;
 
 	@GetMapping
-	public Mono<List<String>> publish(){
-		UUID customerId1 = UUID.randomUUID();
-		UUID customerId2 = UUID.randomUUID();
+	public Flux<String> publish(){
+		String customerId1 = "customerId1";
+		String customerId2 = "customerId2";
 		return Flux.range(0, 10)
-				.map(integer -> integer % 2 == 0 ? customerId1 : customerId2)
-				.map(UUID::toString)
-				.map(uuid -> new Event.CustomerEvent.CustomerReservedTable(uuid, "reserve-id"))
+				.flatMap(integer -> integer % 2 == 0 ? Mono.just(customerId2) : Mono.delay(Duration.ofSeconds(1)).just(customerId1))
+				.map(customerId -> new Event.CustomerEvent.CustomerReservedTable(customerId, "reserve-id"))
 				.flatMap(kafkaEventProducer::produceCustomerEvent)
-				.map(RecordMetadata::topic)
-				.collectList();
+				.map(RecordMetadata::topic);
 	}
 
 	@EventListener(org.springframework.context.event.ContextRefreshedEvent.class)
