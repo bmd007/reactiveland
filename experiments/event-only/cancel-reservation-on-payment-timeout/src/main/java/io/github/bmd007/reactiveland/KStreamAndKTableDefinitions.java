@@ -8,6 +8,9 @@ import org.apache.kafka.streams.kstream.TimeWindows;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import static io.github.bmd007.reactiveland.serialization.CustomSerdes.*;
 
@@ -37,8 +40,10 @@ public class KStreamAndKTableDefinitions {
                 .foreach((key, value) -> {
                     // Perform actions based on processing time window closure
                     // This gets executed when the window closes based on processing time
-                    log.info("key:value = {}:{}", key.key(), value);
-                    log.info("start:stop = {}:{}", key.window().startTime(), key.window().endTime());
+                    LocalTime startTime = ZonedDateTime.ofInstant(key.window().startTime(), ZoneId.systemDefault()).toLocalTime();
+                    LocalTime endTime = ZonedDateTime.ofInstant(key.window().endTime(), ZoneId.systemDefault()).toLocalTime();
+                    log.info("key:value = {}:{} --- start:stop = {}:{}", key.key(), value, startTime, endTime
+                    );
                     // Implement your actions here
                 });
     }
