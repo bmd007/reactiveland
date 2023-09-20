@@ -42,8 +42,7 @@ public class KStreamAndKTableDefinitions {
                     // This gets executed when the window closes based on processing time
                     LocalTime startTime = ZonedDateTime.ofInstant(key.window().startTime(), ZoneId.systemDefault()).toLocalTime();
                     LocalTime endTime = ZonedDateTime.ofInstant(key.window().endTime(), ZoneId.systemDefault()).toLocalTime();
-                    log.info("key:value = {}:{} --- start:stop = {}:{}", key.key(), value, startTime, endTime
-                    );
+                    log.info("{}:{} --- {}:{}", key.key(), value, startTime.getSecond(), endTime.getSecond());
                     // Implement your actions here
                 });
     }
