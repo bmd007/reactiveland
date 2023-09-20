@@ -1,0 +1,9 @@
+spring:
+  kafka:
+    bootstrap-servers: ${spring.embedded.kafka.brokers}
+
+kafka:
+  topic:
+    config:
+      event: '1:1'
+      changelog: '1:1'
