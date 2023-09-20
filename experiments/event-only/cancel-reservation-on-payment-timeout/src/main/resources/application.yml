@@ -42,17 +42,13 @@ spring:
       replication-factor: 1
       properties:
         num.stream.threads: 1
-    bootstrap-servers: "localhost:29092"
-  docker:
-    compose:
-      file: "experiments/event-only/cancel-reservation-on-payment-timeout/compose.yaml"
-
+    bootstrap-servers: "localhost:9092"
 
 kafka:
   topic:
     config:
-      event: '12:3'
-      changelog: '12:3'
+      event: '12:1'
+      changelog: '12:1'
 
   streams:
     server:
@@ -60,3 +56,11 @@ kafka:
         app-ip: localhost
         app-port: ${server.port}
 
+
+logging:
+  level:
+    org.springframework.jdbc: INFO
+    org.springframework.web: INFO
+    org.springframework.kafka: WARN
+    org.apache.kafka: WARN
+    kafka: WARN

@@ -15,10 +15,6 @@ public class CustomSerdes {
     public static final JsonSerde<Event.ReservationCancelledDueToPaymentTimeOut> RESERVATION_CANCELLED_DUE_TO_PAYMENT_TIME_OUT_JSON_SERDE =
             new JsonSerde<>(Event.ReservationCancelledDueToPaymentTimeOut.class);
 
-
-    public static final Consumed<String, Event.CustomerEvent> CUSTOMER_EVENT_CONSUMED =
-            Consumed.with(Serdes.String(), CUSTOMER_EVENT_JSON_SERDE);
-
     public static final Consumed<String, Event.CustomerEvent.CustomerReservedTable> CUSTOMER_RESERVED_TABLE_CONSUMED =
             Consumed.with(Serdes.String(), CUSTOMER_RESERVED_TABLE_JSON_SERDE);
 

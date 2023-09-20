@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
 
-import static io.github.bmd007.reactiveland.serialization.CustomSerdes.CUSTOMER_EVENT_CONSUMED;
+import static io.github.bmd007.reactiveland.serialization.CustomSerdes.*;
 
 @Slf4j
 @Configuration
@@ -28,8 +28,8 @@ public class KStreamAndKTableDefinitions {
 
     @PostConstruct
     public void configureStores() {
-        TimeWindows timeWindows = TimeWindows.ofSizeWithNoGrace(Duration.ofMinutes(10));
-        streamsBuilder.stream(Topics.CUSTOMER_EVENTS_TOPIC, CUSTOMER_EVENT_CONSUMED)
+        TimeWindows timeWindows = TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(5));
+        streamsBuilder.stream(Topics.CUSTOMER_EVENTS_TOPIC, CUSTOMER_RESERVED_TABLE_CONSUMED)
                 .groupByKey()
                 .windowedBy(timeWindows)
                 .count()
