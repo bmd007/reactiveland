@@ -17,30 +17,15 @@ import static io.github.bmd007.reactiveland.serialization.CustomSerdes.*;
 public class KafkaEventProducer {
 
     private final KafkaProducer<String, Event> eventKafkaProducer;
-    private final KafkaProducer<String, Event.CustomerEvent> customerEventKafkaProducer;
-    private final KafkaProducer<String, Event.ReservationCancelledDueToPaymentTimeOut> reservationCancelledOutKafkaProducer;
 
     public KafkaEventProducer(@Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
         var providerConfig = new Properties();
         providerConfig.put("bootstrap.servers", bootstrapServers);
         eventKafkaProducer = new KafkaProducer<>(providerConfig, new StringSerializer(), EVENT_JSON_SERDE.serializer());
-        customerEventKafkaProducer = new KafkaProducer<>(providerConfig, new StringSerializer(), CUSTOMER_EVENT_JSON_SERDE.serializer());
-        reservationCancelledOutKafkaProducer = new KafkaProducer<>(providerConfig, new StringSerializer(),
-                RESERVATION_CANCELLED_DUE_TO_PAYMENT_TIME_OUT_JSON_SERDE.serializer());
     }
 
     public Mono<RecordMetadata> produceEvent(Event event, String topic) {
         var record = new ProducerRecord<>(topic, event.key(), event);
         return Mono.fromCallable(() -> eventKafkaProducer.send(record).get());
-    }
-
-    public Mono<RecordMetadata> produceCustomerEvent(Event.CustomerEvent customerEvent) {
-        var record = new ProducerRecord<>(Topics.CUSTOMER_EVENTS_TOPIC, customerEvent.key(), customerEvent);
-        return Mono.fromCallable(() -> customerEventKafkaProducer.send(record).get());
-    }
-
-    public Mono<RecordMetadata> produceReservationCancelledEvent(Event.ReservationCancelledDueToPaymentTimeOut reservationCancelled) {
-        var record = new ProducerRecord<>(Topics.RESERVATION_EVENTS_TOPIC, reservationCancelled.key(), reservationCancelled);
-        return Mono.fromCallable(() -> reservationCancelledOutKafkaProducer.send(record).get());
     }
 }

@@ -18,6 +18,10 @@ import java.util.UUID;
 })
 public interface Event {
 
+    default String type() {
+        return this.getClass().getName();
+    }
+
     default String key() {
         return UUID.randomUUID().toString();
     }
@@ -26,7 +30,8 @@ public interface Event {
         return ZonedDateTime.now();
     }
 
-    record DefaultEvent() implements Event{}
+    record DefaultEvent() implements Event {
+    }
 
     record ReservationCancelledDueToPaymentTimeOut(String customerId, String reservationId) implements Event {
         @Override
@@ -53,7 +58,8 @@ public interface Event {
             return customerId();
         }
 
-        record DefaultCustomerEvent(String customerId) implements CustomerEvent{}
+        record DefaultCustomerEvent(String customerId) implements CustomerEvent {
+        }
 
         record CustomerReservedTable(String customerId, String reservationId) implements CustomerEvent {
         }

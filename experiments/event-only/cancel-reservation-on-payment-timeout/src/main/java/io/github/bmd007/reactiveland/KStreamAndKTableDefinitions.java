@@ -1,6 +1,9 @@
 package io.github.bmd007.reactiveland;
 
 import io.github.bmd007.reactiveland.configuration.Topics;
+import io.github.bmd007.reactiveland.domain.ReservationAggregate;
+import io.github.bmd007.reactiveland.event.Event.CustomerEvent.CustomerPaidForReservation;
+import io.github.bmd007.reactiveland.event.Event.CustomerEvent.CustomerReservedTable;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -12,7 +15,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-import static io.github.bmd007.reactiveland.serialization.CustomSerdes.*;
+import static io.github.bmd007.reactiveland.serialization.CustomSerdes.EVENT_CONSUMED;
 
 @Slf4j
 @Configuration
@@ -36,7 +39,21 @@ public class KStreamAndKTableDefinitions {
                 .peek((key, value) -> log.info("one more event {}:{} ", key, value))
                 .groupByKey()
                 .windowedBy(timeWindows)
-                .count()
+                .aggregate(ReservationAggregate::empty, (key, value, aggregate) ->
+                        switch (value.type()) {
+                            case "CustomerPaidForReservation" -> {
+                                CustomerPaidForReservation customerPaidForReservation = (CustomerPaidForReservation) value;
+                                log.info("CustomerReservedTable {} ", customerPaidForReservation);
+                                yield aggregate.paidFor();
+                            }
+                            case "CustomerReservedTable" -> {
+                                CustomerReservedTable customerReservedTable = (CustomerReservedTable) value;
+                                log.info("customerReservedTable {} ", customerReservedTable);
+                                yield aggregate.awaitPayment(customerReservedTable.reservationId(), customerReservedTable.customerId());
+                            }
+                            default -> aggregate;
+                        }
+                )
                 .toStream()
                 .foreach((key, value) -> {
                     // Perform actions based on processing time window closure
