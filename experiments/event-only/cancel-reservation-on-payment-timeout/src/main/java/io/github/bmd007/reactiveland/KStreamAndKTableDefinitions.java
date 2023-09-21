@@ -35,7 +35,6 @@ public class KStreamAndKTableDefinitions {
                     .withKeySerde(Serdes.String())
                     .withValueSerde(RESERVATION_AGGREGATE_JSON_SERDE);
 
-
     private final StreamsBuilder streamsBuilder;
 
     public KStreamAndKTableDefinitions(StreamsBuilder streamsBuilder) {
