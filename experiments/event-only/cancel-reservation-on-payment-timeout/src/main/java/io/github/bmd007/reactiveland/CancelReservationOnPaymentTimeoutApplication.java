@@ -31,7 +31,7 @@ public class CancelReservationOnPaymentTimeoutApplication {
 
 		kafkaEventProducer.produceEvent(new CustomerRequestedTable(customerId1, "reserve-id1"), Topics.CUSTOMER_EVENTS_TOPIC).block();
 		kafkaEventProducer.produceEvent(new CustomerRequestedTable(customerId2, "reserve-id2"), Topics.CUSTOMER_EVENTS_TOPIC).block();
-		Thread.sleep(10000);
+		Thread.sleep(7000);
 		kafkaEventProducer.produceEvent(new CustomerPaidForReservation(customerId1, "payment-id1"), Topics.CUSTOMER_EVENTS_TOPIC).block();
 		return Flux.range(0, 10)
 //				.delayUntil(integer -> integer % 2 == 0 ? Mono.just("ignore") : Mono.delay(Duration.ofSeconds(1)))

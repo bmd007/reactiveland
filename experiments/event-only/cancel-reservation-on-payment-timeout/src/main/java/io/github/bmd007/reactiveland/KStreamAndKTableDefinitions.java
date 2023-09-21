@@ -12,7 +12,9 @@ import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Suppressed;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.apache.kafka.streams.kstream.internals.suppress.StrictBufferConfigImpl;
 import org.apache.kafka.streams.state.WindowStore;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,7 +23,6 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-import static io.github.bmd007.reactiveland.domain.ReservationAggregate.ReservationStatus.*;
 import static io.github.bmd007.reactiveland.serialization.CustomSerdes.*;
 
 @Slf4j
@@ -43,20 +44,19 @@ public class KStreamAndKTableDefinitions {
 
     @PostConstruct
     public void configureStores() {
-        TimeWindows timeWindows = TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(20));
+        TimeWindows timeWindows = TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(30));
         streamsBuilder.stream(Topics.CUSTOMER_EVENTS_TOPIC, EVENT_CONSUMED)
                 .groupByKey(Grouped.with(Serdes.String(), EVENT_JSON_SERDE))
                 .windowedBy(timeWindows)
                 .aggregate(ReservationAggregate::createEmpty,
                         (key, value, aggregate) -> switch (value) {
-                            case CustomerRequestedTable customerRequestedTable -> aggregate.withStatus(AWAITING_PAYMENT)
-                                    .withCustomerId(key)
-                                    .withReservationId(customerRequestedTable.reservationId());
-                            case CustomerPaidForReservation ignored -> aggregate.withStatus(FINALIZED);
+                            case CustomerRequestedTable customerRequestedTable -> aggregate.awaitPayment(key, customerRequestedTable.reservationId());
+                            case CustomerPaidForReservation ignored -> aggregate.finalizeReservation();
                             default -> ReservationAggregate.createEmpty();
                         },
                         RESERVATION_LOCAL_KTABLE_MATERIALIZED
                 )
+                .suppress(Suppressed.untilWindowCloses(new StrictBufferConfigImpl()))
                 .toStream()
                 .foreach((key, value) -> {
                     // Perform actions based on processing time window closure
