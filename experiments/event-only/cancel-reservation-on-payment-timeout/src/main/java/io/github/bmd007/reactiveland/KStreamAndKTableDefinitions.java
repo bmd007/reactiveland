@@ -46,7 +46,7 @@ public class KStreamAndKTableDefinitions {
             case CustomerPaidForReservation ignored -> {
                 try {
                     yield aggregate.finalizeReservation();
-                }catch (Exception c){
+                } catch (Exception c) {
                     log.error("error on finalizeReservation for {}", aggregate, c);
                     yield aggregate;
                 }
