@@ -32,7 +32,8 @@ public class KStreamAndKTableDefinitions {
     @PostConstruct
     public void configureStores() {
         TimeWindows timeWindows = TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(2));
-        streamsBuilder.stream(Topics.CUSTOMER_EVENTS_TOPIC, CUSTOMER_RESERVED_TABLE_CONSUMED)
+        streamsBuilder.stream(Topics.CUSTOMER_EVENTS_TOPIC, EVENT_CONSUMED)
+                .peek((key, value) -> log.info("one more event {}:{} ", key, value))
                 .groupByKey()
                 .windowedBy(timeWindows)
                 .count()

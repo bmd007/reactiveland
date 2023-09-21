@@ -4,8 +4,12 @@ import io.github.bmd007.reactiveland.event.Event;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.Produced;
+import org.springframework.kafka.support.serializer.JsonSerde;
 
 public class CustomSerdes {
+    public static final JsonSerde<Event> EVENT_JSON_SERDE =
+            new JsonSerde<>(Event.class);
+
     public static final JsonSerde<Event.CustomerEvent> CUSTOMER_EVENT_JSON_SERDE =
             new JsonSerde<>(Event.CustomerEvent.class);
     public static final JsonSerde<Event.CustomerEvent.CustomerReservedTable> CUSTOMER_RESERVED_TABLE_JSON_SERDE =
@@ -14,6 +18,18 @@ public class CustomSerdes {
             new JsonSerde<>(Event.CustomerEvent.CustomerPaidForReservation.class);
     public static final JsonSerde<Event.ReservationCancelledDueToPaymentTimeOut> RESERVATION_CANCELLED_DUE_TO_PAYMENT_TIME_OUT_JSON_SERDE =
             new JsonSerde<>(Event.ReservationCancelledDueToPaymentTimeOut.class);
+
+    public static final Consumed<String, Event> EVENT_CONSUMED =
+            Consumed.with(Serdes.String(), EVENT_JSON_SERDE);
+
+    public static final Produced<String, Event> EVENT_PRODUCED =
+            Produced.with(Serdes.String(), EVENT_JSON_SERDE);
+
+    public static final Consumed<String, Event.CustomerEvent> CUSTOMER_EVENT_CONSUMED =
+            Consumed.with(Serdes.String(), CUSTOMER_EVENT_JSON_SERDE);
+
+    public static final Produced<String, Event.CustomerEvent> CUSTOMER_EVENT_PRODUCED =
+            Produced.with(Serdes.String(), CUSTOMER_EVENT_JSON_SERDE);
 
     public static final Consumed<String, Event.CustomerEvent.CustomerReservedTable> CUSTOMER_RESERVED_TABLE_CONSUMED =
             Consumed.with(Serdes.String(), CUSTOMER_RESERVED_TABLE_JSON_SERDE);

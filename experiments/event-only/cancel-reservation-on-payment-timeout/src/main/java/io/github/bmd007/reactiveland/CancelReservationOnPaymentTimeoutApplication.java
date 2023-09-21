@@ -1,6 +1,7 @@
 package io.github.bmd007.reactiveland;
 
 import io.github.bmd007.reactiveland.configuration.KafkaEventProducer;
+import io.github.bmd007.reactiveland.configuration.Topics;
 import io.github.bmd007.reactiveland.event.Event;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -32,7 +33,8 @@ public class CancelReservationOnPaymentTimeoutApplication {
 				.delayUntil(integer -> integer % 2 == 0 ? Mono.just("ignore") : Mono.delay(Duration.ofSeconds(1)))
 				.map(integer -> integer % 2 == 0 ? customerId2 : customerId1)
 				.map(customerId -> new Event.CustomerEvent.CustomerReservedTable(customerId, "reserve-id"))
-				.flatMap(kafkaEventProducer::produceCustomerEvent)
+//				.flatMap(kafkaEventProducer::produceCustomerEvent)
+				.flatMap(event -> kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC))
 				.count();
 	}
 
