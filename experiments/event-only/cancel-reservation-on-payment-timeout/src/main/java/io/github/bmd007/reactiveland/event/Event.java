@@ -8,7 +8,7 @@ import java.util.UUID;
 
 
 @JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
+        use = JsonTypeInfo.Id.CLASS,
         property = "type",
         defaultImpl = Event.DefaultEvent.class
 )
@@ -37,7 +37,7 @@ public interface Event {
     }
 
     @JsonTypeInfo(
-            use = JsonTypeInfo.Id.NAME,
+            use = JsonTypeInfo.Id.CLASS,
             property = "type",
             defaultImpl = CustomerEvent.DefaultCustomerEvent.class
     )
