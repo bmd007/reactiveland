@@ -24,10 +24,10 @@ public class ReservationAggregate {
     String customerId;
 
     public ReservationAggregate finalizeReservation() {
-        if (!isEmpty() && !status.equals(FINALIZED) && status.equals(AWAITING_PAYMENT)) {
-            return withStatus(FINALIZED);
+        if (isEmpty() || status.equals(FINALIZED) || !status.equals(AWAITING_PAYMENT)) {
+            throw new IllegalStateException("already finalized or not initialized yet");
         }
-        throw new IllegalStateException("already finalized or not initialized yet");
+        return withStatus(FINALIZED);
     }
 
     public ReservationAggregate awaitPayment(String customerId, String reservationId) {

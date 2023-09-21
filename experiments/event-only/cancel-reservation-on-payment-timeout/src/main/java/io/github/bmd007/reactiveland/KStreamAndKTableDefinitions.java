@@ -3,6 +3,7 @@ package io.github.bmd007.reactiveland;
 import io.github.bmd007.reactiveland.configuration.StateStores;
 import io.github.bmd007.reactiveland.configuration.Topics;
 import io.github.bmd007.reactiveland.domain.ReservationAggregate;
+import io.github.bmd007.reactiveland.event.Event;
 import io.github.bmd007.reactiveland.event.Event.CustomerEvent.CustomerPaidForReservation;
 import io.github.bmd007.reactiveland.event.Event.CustomerEvent.CustomerRequestedTable;
 import jakarta.annotation.PostConstruct;
@@ -12,9 +13,7 @@ import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.Materialized;
-import org.apache.kafka.streams.kstream.Suppressed;
 import org.apache.kafka.streams.kstream.TimeWindows;
-import org.apache.kafka.streams.kstream.internals.suppress.StrictBufferConfigImpl;
 import org.apache.kafka.streams.state.WindowStore;
 import org.springframework.context.annotation.Configuration;
 
@@ -41,21 +40,29 @@ public class KStreamAndKTableDefinitions {
         this.streamsBuilder = streamsBuilder;
     }
 
+    private static ReservationAggregate aggregation(String key, Event value, ReservationAggregate aggregate) {
+        return switch (value) {
+            case CustomerRequestedTable customerRequestedTable -> aggregate.awaitPayment(key, customerRequestedTable.reservationId());
+            case CustomerPaidForReservation ignored -> {
+                try {
+                    yield aggregate.finalizeReservation();
+                }catch (Exception c){
+                    log.error("error on finalizeReservation for {}", aggregate, c);
+                    yield aggregate;
+                }
+            }
+            default -> ReservationAggregate.createEmpty();
+        };
+    }
+
     @PostConstruct
     public void configureStores() {
         TimeWindows timeWindows = TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(30));
         streamsBuilder.stream(Topics.CUSTOMER_EVENTS_TOPIC, EVENT_CONSUMED)
                 .groupByKey(Grouped.with(Serdes.String(), EVENT_JSON_SERDE))
                 .windowedBy(timeWindows)
-                .aggregate(ReservationAggregate::createEmpty,
-                        (key, value, aggregate) -> switch (value) {
-                            case CustomerRequestedTable customerRequestedTable -> aggregate.awaitPayment(key, customerRequestedTable.reservationId());
-                            case CustomerPaidForReservation ignored -> aggregate.finalizeReservation();
-                            default -> ReservationAggregate.createEmpty();
-                        },
-                        RESERVATION_LOCAL_KTABLE_MATERIALIZED
-                )
-                .suppress(Suppressed.untilWindowCloses(new StrictBufferConfigImpl()))
+                .aggregate(ReservationAggregate::createEmpty, KStreamAndKTableDefinitions::aggregation, RESERVATION_LOCAL_KTABLE_MATERIALIZED)
+//                .suppress(Suppressed.untilWindowCloses(new StrictBufferConfigImpl()))
                 .toStream()
                 .foreach((key, value) -> {
                     // Perform actions based on processing time window closure
