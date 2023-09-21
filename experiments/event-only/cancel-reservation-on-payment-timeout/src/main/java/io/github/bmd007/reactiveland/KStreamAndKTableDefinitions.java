@@ -1,13 +1,19 @@
 package io.github.bmd007.reactiveland;
 
+import io.github.bmd007.reactiveland.configuration.StateStores;
 import io.github.bmd007.reactiveland.configuration.Topics;
 import io.github.bmd007.reactiveland.domain.ReservationAggregate;
 import io.github.bmd007.reactiveland.event.Event.CustomerEvent.CustomerPaidForReservation;
 import io.github.bmd007.reactiveland.event.Event.CustomerEvent.CustomerReservedTable;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.apache.kafka.streams.state.Stores;
+import org.apache.kafka.streams.state.WindowStore;
+import org.apache.kafka.streams.state.internals.InMemoryWindowBytesStoreSupplier;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
@@ -25,6 +31,14 @@ public class KStreamAndKTableDefinitions {
 //            .<String, WonderSeeker>as(Stores.inMemoryKeyValueStore(WONDER_SEEKER_IN_MEMORY_STATE_STORE))
 //            .withKeySerde(Serdes.String())
 //            .withValueSerde(WONDER_SEEKER_JSON_SERDE);
+
+
+    private static final Materialized<String, ReservationAggregate, WindowStore<Bytes, byte[]>> RESERVATION_LOCAL_KTABLE_MATERIALIZED =
+            Materialized.<String, ReservationAggregate>as(
+                    Stores.windowStoreBuilder(new InMemoryWindowBytesStoreSupplier(StateStores.RESERVATION_STATUS_IN_MEMORY_STATE_STORE,
+
+                            ))
+            );
 
     private final StreamsBuilder streamsBuilder;
 
@@ -52,7 +66,8 @@ public class KStreamAndKTableDefinitions {
                                 yield aggregate.awaitPayment(customerReservedTable.reservationId(), customerReservedTable.customerId());
                             }
                             default -> aggregate;
-                        }
+                        },
+                        RESERVATION_LOCAL_KTABLE_MATERIALIZED
                 )
                 .toStream()
                 .foreach((key, value) -> {

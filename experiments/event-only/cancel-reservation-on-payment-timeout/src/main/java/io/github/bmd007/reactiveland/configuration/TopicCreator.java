@@ -17,8 +17,13 @@ public class TopicCreator {
 
     private final PartitionDef eventTopicDefinition;
     private final PartitionDef changeLogTopicDefinition;
+    private final String applicationName;
 
-    public TopicCreator(@Value("${kafka.topic.config.event}") String eventTopicDefinition, @Value("${kafka.topic.config.changelog}") String changeLogTopicDefinition) {
+    public TopicCreator(
+            @Value("${spring.application.name}") String applicationName,
+            @Value("${kafka.topic.config.event}") String eventTopicDefinition,
+            @Value("${kafka.topic.config.changelog}") String changeLogTopicDefinition) {
+        this.applicationName = applicationName;
         this.eventTopicDefinition = PartitionDef.parse(eventTopicDefinition);
         this.changeLogTopicDefinition = PartitionDef.parse(changeLogTopicDefinition);
 
@@ -40,12 +45,12 @@ public class TopicCreator {
         return String.format("%s-%s-changelog", applicationName, storeName);
     }
 
-//    @Bean
-//    public NewTopic wonderSeekerSeekChangeLogTopic() {
-//        return new NewTopic(stateStoreTopicName(StateStores.WONDER_SEEKER_IN_MEMORY_STATE_STORE, applicationName),
-//                changeLogTopicDefinition.numPartitions, changeLogTopicDefinition.replicationFactor)
-//                .configs(Map.of(CLEANUP_POLICY_CONFIG, CLEANUP_POLICY_COMPACT));
-//    }
+    @Bean
+    public NewTopic reservationAggregateChangeLogTopic() {
+        return new NewTopic(stateStoreTopicName(StateStores.RESERVATION_STATUS_IN_MEMORY_STATE_STORE, applicationName),
+                changeLogTopicDefinition.numPartitions, changeLogTopicDefinition.replicationFactor)
+                .configs(Map.of(CLEANUP_POLICY_CONFIG, CLEANUP_POLICY_COMPACT));
+    }
 
     private record PartitionDef(int numPartitions, short replicationFactor) {
 

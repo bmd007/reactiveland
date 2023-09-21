@@ -1,5 +1,6 @@
 package io.github.bmd007.reactiveland.serialization;
 
+import io.github.bmd007.reactiveland.domain.ReservationAggregate;
 import io.github.bmd007.reactiveland.event.Event;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.kstream.Consumed;
@@ -7,9 +8,10 @@ import org.apache.kafka.streams.kstream.Produced;
 import org.springframework.kafka.support.serializer.JsonSerde;
 
 public class CustomSerdes {
+    public static final JsonSerde<ReservationAggregate> RESERVATION_AGGREGATE_JSON_SERDE =
+            new JsonSerde<>(ReservationAggregate.class);
     public static final JsonSerde<Event> EVENT_JSON_SERDE =
             new JsonSerde<>(Event.class);
-
     public static final JsonSerde<Event.CustomerEvent> CUSTOMER_EVENT_JSON_SERDE =
             new JsonSerde<>(Event.CustomerEvent.class);
     public static final JsonSerde<Event.CustomerEvent.CustomerReservedTable> CUSTOMER_RESERVED_TABLE_JSON_SERDE =
