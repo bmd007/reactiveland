@@ -35,6 +35,7 @@ public class CancelReservationOnPaymentTimeoutApplication {
 				.map(customerId -> new Event.CustomerEvent.CustomerReservedTable(customerId, "reserve-id"))
 //				.flatMap(kafkaEventProducer::produceCustomerEvent)
 				.flatMap(event -> kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC))
+				.zipWith(kafkaEventProducer.produceEvent(new Event.CustomerEvent.CustomerPaidForReservation(customerId1, "payment-id"), Topics.CUSTOMER_EVENTS_TOPIC).cache().repeat())
 				.count();
 	}
 
