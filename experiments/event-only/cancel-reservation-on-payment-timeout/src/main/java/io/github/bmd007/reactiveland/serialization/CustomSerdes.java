@@ -14,8 +14,8 @@ public class CustomSerdes {
             new JsonSerde<>(Event.class);
     public static final JsonSerde<Event.CustomerEvent> CUSTOMER_EVENT_JSON_SERDE =
             new JsonSerde<>(Event.CustomerEvent.class);
-    public static final JsonSerde<Event.CustomerEvent.CustomerReservedTable> CUSTOMER_RESERVED_TABLE_JSON_SERDE =
-            new JsonSerde<>(Event.CustomerEvent.CustomerReservedTable.class);
+    public static final JsonSerde<Event.CustomerEvent.CustomerRequestedTable> CUSTOMER_RESERVED_TABLE_JSON_SERDE =
+            new JsonSerde<>(Event.CustomerEvent.CustomerRequestedTable.class);
     public static final JsonSerde<Event.CustomerEvent.CustomerPaidForReservation> CUSTOMER_PAID_FOR_RESERVATION_JSON_SERDE =
             new JsonSerde<>(Event.CustomerEvent.CustomerPaidForReservation.class);
     public static final JsonSerde<Event.ReservationCancelledDueToPaymentTimeOut> RESERVATION_CANCELLED_DUE_TO_PAYMENT_TIME_OUT_JSON_SERDE =
@@ -33,10 +33,10 @@ public class CustomSerdes {
     public static final Produced<String, Event.CustomerEvent> CUSTOMER_EVENT_PRODUCED =
             Produced.with(Serdes.String(), CUSTOMER_EVENT_JSON_SERDE);
 
-    public static final Consumed<String, Event.CustomerEvent.CustomerReservedTable> CUSTOMER_RESERVED_TABLE_CONSUMED =
+    public static final Consumed<String, Event.CustomerEvent.CustomerRequestedTable> CUSTOMER_RESERVED_TABLE_CONSUMED =
             Consumed.with(Serdes.String(), CUSTOMER_RESERVED_TABLE_JSON_SERDE);
 
-    public static final Produced<String, Event.CustomerEvent.CustomerReservedTable> CUSTOMER_RESERVED_TABLE_PRODUCED =
+    public static final Produced<String, Event.CustomerEvent.CustomerRequestedTable> CUSTOMER_RESERVED_TABLE_PRODUCED =
             Produced.with(Serdes.String(), CUSTOMER_RESERVED_TABLE_JSON_SERDE);
     public static final Consumed<String, Event.CustomerEvent.CustomerPaidForReservation> CUSTOMER_PAID_FOR_RESERVATION_CONSUMED =
             Consumed.with(Serdes.String(), CUSTOMER_PAID_FOR_RESERVATION_JSON_SERDE);

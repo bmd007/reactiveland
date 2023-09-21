@@ -4,7 +4,7 @@ import io.github.bmd007.reactiveland.configuration.StateStores;
 import io.github.bmd007.reactiveland.configuration.Topics;
 import io.github.bmd007.reactiveland.domain.ReservationAggregate;
 import io.github.bmd007.reactiveland.event.Event.CustomerEvent.CustomerPaidForReservation;
-import io.github.bmd007.reactiveland.event.Event.CustomerEvent.CustomerReservedTable;
+import io.github.bmd007.reactiveland.event.Event.CustomerEvent.CustomerRequestedTable;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Serdes;
@@ -22,7 +22,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 import static io.github.bmd007.reactiveland.domain.ReservationAggregate.ReservationStatus.*;
-import static io.github.bmd007.reactiveland.domain.ReservationAggregate.ReservationStatus.AWAITING_CUSTOMER_PAYMENT;
 import static io.github.bmd007.reactiveland.serialization.CustomSerdes.*;
 
 @Slf4j
@@ -44,19 +43,18 @@ public class KStreamAndKTableDefinitions {
 
     @PostConstruct
     public void configureStores() {
-        TimeWindows timeWindows = TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(2));
+        TimeWindows timeWindows = TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(20));
         streamsBuilder.stream(Topics.CUSTOMER_EVENTS_TOPIC, EVENT_CONSUMED)
                 .groupByKey(Grouped.with(Serdes.String(), EVENT_JSON_SERDE))
                 .windowedBy(timeWindows)
-                .aggregate(() -> ReservationAggregate.builder().build(),
-                        (key, value, aggregate) ->
-                                switch (value) {
-                                    case CustomerPaidForReservation ignore -> aggregate.withStatus(AWAITING_CUSTOMER_PAYMENT);
-                                    case CustomerReservedTable customerReservedTable -> aggregate.withReservationId(customerReservedTable.reservationId())
-                                            .withCustomerId(customerReservedTable.customerId())
-                                            .withStatus(RESERVED_FOR_CUSTOMER);
-                                    default -> aggregate;
-                                },
+                .aggregate(ReservationAggregate::createEmpty,
+                        (key, value, aggregate) -> switch (value) {
+                            case CustomerRequestedTable customerRequestedTable -> aggregate.withStatus(AWAITING_PAYMENT)
+                                    .withCustomerId(key)
+                                    .withReservationId(customerRequestedTable.reservationId());
+                            case CustomerPaidForReservation ignored -> aggregate.withStatus(FINALIZED);
+                            default -> ReservationAggregate.createEmpty();
+                        },
                         RESERVATION_LOCAL_KTABLE_MATERIALIZED
                 )
                 .toStream()

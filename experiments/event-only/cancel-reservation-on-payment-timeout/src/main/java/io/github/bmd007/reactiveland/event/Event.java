@@ -47,7 +47,7 @@ public interface Event {
             defaultImpl = CustomerEvent.DefaultCustomerEvent.class
     )
     @JsonSubTypes({
-            @JsonSubTypes.Type(value = CustomerEvent.CustomerReservedTable.class, name = "CustomerReservedTable"),
+            @JsonSubTypes.Type(value = CustomerEvent.CustomerRequestedTable.class, name = "CustomerRequestedTable"),
             @JsonSubTypes.Type(value = CustomerEvent.CustomerPaidForReservation.class, name = "CustomerPaidForReservation"),
     })
     interface CustomerEvent extends Event {
@@ -61,7 +61,7 @@ public interface Event {
         record DefaultCustomerEvent(String customerId) implements CustomerEvent {
         }
 
-        record CustomerReservedTable(String customerId, String reservationId) implements CustomerEvent {
+        record CustomerRequestedTable(String customerId, String reservationId) implements CustomerEvent {
         }
 
         record CustomerPaidForReservation(String customerId, String paymentId) implements CustomerEvent {
