@@ -3,7 +3,7 @@ package io.github.bmd007.reactiveland;
 import io.github.bmd007.reactiveland.configuration.KafkaEventProducer;
 import io.github.bmd007.reactiveland.configuration.StateStores;
 import io.github.bmd007.reactiveland.configuration.Topics;
-import io.github.bmd007.reactiveland.domain.ReservationAggregate;
+import io.github.bmd007.reactiveland.domain.TableReservation;
 import io.github.bmd007.reactiveland.event.Event;
 import io.github.bmd007.reactiveland.event.Event.CustomerEvent.CustomerPaidForReservation;
 import io.github.bmd007.reactiveland.event.Event.CustomerEvent.CustomerRequestedTable;
@@ -31,8 +31,8 @@ import static io.github.bmd007.reactiveland.serialization.CustomSerdes.*;
 @Configuration
 public class KStreamAndKTableDefinitions {
 
-    private static final Materialized<String, ReservationAggregate, WindowStore<Bytes, byte[]>> RESERVATION_LOCAL_KTABLE_MATERIALIZED =
-            Materialized.<String, ReservationAggregate, WindowStore<Bytes, byte[]>>as(StateStores.RESERVATION_STATUS_IN_MEMORY_STATE_STORE)
+    private static final Materialized<String, TableReservation, WindowStore<Bytes, byte[]>> RESERVATION_LOCAL_KTABLE_MATERIALIZED =
+            Materialized.<String, TableReservation, WindowStore<Bytes, byte[]>>as(StateStores.RESERVATION_STATUS_IN_MEMORY_STATE_STORE)
                     .withStoreType(Materialized.StoreType.IN_MEMORY)
                     .withKeySerde(Serdes.String())
                     .withValueSerde(RESERVATION_AGGREGATE_JSON_SERDE);
@@ -45,43 +45,40 @@ public class KStreamAndKTableDefinitions {
         this.kafkaEventProducer = kafkaEventProducer;
     }
 
-    private static ReservationAggregate aggregation(String key, Event value, ReservationAggregate aggregate) {
+    private static TableReservation aggregation(String key, Event value, TableReservation aggregate) {
         return switch (value) {
-            case CustomerRequestedTable customerRequestedTable ->
-                    aggregate.awaitPayment(key, customerRequestedTable.reservationId());
+            case CustomerRequestedTable customerRequestedTable -> {
+                TableReservation tableReservation = aggregate.withTableId(customerRequestedTable.tableId()).awaitPayment(key);
+//                log.info("awaiting payment {}", tableReservation);
+                yield tableReservation;
+            }
             case CustomerPaidForReservation ignored -> {
                 try {
-                    yield aggregate.finalizeReservation();
-                } catch (Exception c) {
-                    log.error("error on finalizeReservation for {}", aggregate, c);
+                    yield aggregate.paidFor();
+                } catch (Exception e) {
+                    log.error("error when setting the table paid for {}", aggregate, e);
                     yield aggregate;
                 }
             }
-            default -> ReservationAggregate.createEmpty();
+            default -> TableReservation.createTable();
         };
     }
 
     @PostConstruct
     public void configureStores() {
-        TimeWindows timeWindows = TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(30));
+        TimeWindows timeWindows = TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(10));
         streamsBuilder.stream(Topics.CUSTOMER_EVENTS_TOPIC, EVENT_CONSUMED)
+//                .peek((key, value) -> log.info("new event {}", value))
                 .groupByKey(Grouped.with(Serdes.String(), EVENT_JSON_SERDE))
                 .windowedBy(timeWindows)
-                .aggregate(ReservationAggregate::createEmpty, KStreamAndKTableDefinitions::aggregation, RESERVATION_LOCAL_KTABLE_MATERIALIZED)
+                .aggregate(TableReservation::createTable, KStreamAndKTableDefinitions::aggregation, RESERVATION_LOCAL_KTABLE_MATERIALIZED)
                 .suppress(Suppressed.untilWindowCloses(new StrictBufferConfigImpl()))
                 .toStream()
                 //maybe add a stable (not windowed) ktable for finalized reservations here
-                .foreach((key, reservationAggregate) -> {
-//                    produce other events if needed.
-//                    if (reservationAggregate.isFinalized()) {
-//                    } else {
-//                    }
-                    // Perform actions based on processing time window closure
-                    // This gets executed when the window closes based on processing time
+                .foreach((key, tableReservation) -> {
                     LocalTime startTime = ZonedDateTime.ofInstant(key.window().startTime(), ZoneId.systemDefault()).toLocalTime();
                     LocalTime endTime = ZonedDateTime.ofInstant(key.window().endTime(), ZoneId.systemDefault()).toLocalTime();
-                    log.info("{}:{} --- {}:{}", key.key(), reservationAggregate, startTime.getSecond(), endTime.getSecond());
-                    // Implement your actions here
+                    log.info("{}:{} --- {}:{}", key.key(), tableReservation, startTime.getSecond(), endTime.getSecond());
                 });
     }
 }

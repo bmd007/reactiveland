@@ -53,7 +53,7 @@ public interface Event {
         record DefaultCustomerEvent(String customerId) implements CustomerEvent {
         }
 
-        record CustomerRequestedTable(String customerId, String reservationId) implements CustomerEvent {
+        record CustomerRequestedTable(String customerId, String tableId) implements CustomerEvent {
         }
 
         record CustomerPaidForReservation(String customerId, String paymentId) implements CustomerEvent {

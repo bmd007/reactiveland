@@ -4,47 +4,53 @@ import io.github.bmd007.reactiveland.configuration.KafkaEventProducer;
 import io.github.bmd007.reactiveland.configuration.Topics;
 import io.github.bmd007.reactiveland.event.Event.CustomerEvent.CustomerPaidForReservation;
 import io.github.bmd007.reactiveland.event.Event.CustomerEvent.CustomerRequestedTable;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.event.EventListener;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+import java.util.UUID;
+
+@Slf4j
 @RestController
 @SpringBootApplication
 public class CancelReservationOnPaymentTimeoutApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(CancelReservationOnPaymentTimeoutApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(CancelReservationOnPaymentTimeoutApplication.class, args);
+    }
 
-	@Autowired
-	private KafkaEventProducer kafkaEventProducer;
+    @Autowired
+    private KafkaEventProducer kafkaEventProducer;
 
-	@GetMapping
-	public Mono<Long> publish() throws InterruptedException {
-		String customerId1 = "customerId1";
-		String customerId2 = "customerId2";
 
-		kafkaEventProducer.produceEvent(new CustomerRequestedTable(customerId1, "reserve-id1"), Topics.CUSTOMER_EVENTS_TOPIC).block();
-		kafkaEventProducer.produceEvent(new CustomerRequestedTable(customerId2, "reserve-id2"), Topics.CUSTOMER_EVENTS_TOPIC).block();
-		Thread.sleep(7000);
-		kafkaEventProducer.produceEvent(new CustomerPaidForReservation(customerId1, "payment-id1"), Topics.CUSTOMER_EVENTS_TOPIC).block();
-		Thread.sleep(27000);
-		kafkaEventProducer.produceEvent(new CustomerPaidForReservation(customerId2, "payment-id2"), Topics.CUSTOMER_EVENTS_TOPIC).block();
-		return Flux.range(0, 10)
-//				.delayUntil(integer -> integer % 2 == 0 ? Mono.just("ignore") : Mono.delay(Duration.ofSeconds(1)))
-//				.map(integer -> integer % 2 == 0 ? customerId2 : customerId1)
-//				.map(customerId -> new CustomerRequestedTable(customerId, "reserve-id"))
-//				.flatMap(event -> kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC))
-//				.zipWith(kafkaEventProducer.produceEvent(new CustomerPaidForReservation(customerId1, "payment-id"), Topics.CUSTOMER_EVENTS_TOPIC).cache().repeat())
-				.count();
-	}
+    @GetMapping("/customer1")
+    public Mono customer1ReserveAndPayInTime() {
+        String customerId1 = UUID.randomUUID().toString();
+        return kafkaEventProducer.produceEvent(new CustomerRequestedTable(customerId1, "table1"), Topics.CUSTOMER_EVENTS_TOPIC)
+                .delayElement(Duration.ofSeconds(5))
+                .map(ignored -> new CustomerPaidForReservation(customerId1, "payment1"))
+                .flatMap(event -> kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC))
+                .map(RecordMetadata::topic);
+    }
 
-	@EventListener(org.springframework.context.event.ContextRefreshedEvent.class)
-	public void contextRefreshedEvent() {
-	}
+    @GetMapping("/customer2")
+    public Mono customer2ReserveAndPayInTime() {
+        String customerId2 = UUID.randomUUID().toString();
+        return kafkaEventProducer.produceEvent(new CustomerRequestedTable(customerId2, "table2"), Topics.CUSTOMER_EVENTS_TOPIC)
+                .delayElement(Duration.ofSeconds(10))
+                .map(ignored -> new CustomerPaidForReservation(customerId2, "payment2"))
+                .flatMap(event -> kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC))
+                .map(RecordMetadata::topic);
+    }
+
+    @EventListener(org.springframework.context.event.ContextRefreshedEvent.class)
+    public void contextRefreshedEvent() {
+    }
 }
