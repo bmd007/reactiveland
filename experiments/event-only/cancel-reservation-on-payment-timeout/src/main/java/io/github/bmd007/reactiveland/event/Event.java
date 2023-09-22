@@ -13,7 +13,7 @@ import java.util.UUID;
         defaultImpl = Event.DefaultEvent.class
 )
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = Event.ReservationCancelledDueToPaymentTimeOut.class, name = "CustomerEvent"),
+        @JsonSubTypes.Type(value = Event.CustomerEvent.class, name = "CustomerEvent"),
         @JsonSubTypes.Type(value = Event.DefaultEvent.class, name = "DefaultEvent")
 })
 public interface Event {
@@ -31,14 +31,6 @@ public interface Event {
     }
 
     record DefaultEvent() implements Event {
-    }
-
-    record ReservationCancelledDueToPaymentTimeOut(String customerId, String reservationId) implements Event {
-        @Override
-        public String key() {
-            return reservationId;
-        }
-
     }
 
     @JsonTypeInfo(

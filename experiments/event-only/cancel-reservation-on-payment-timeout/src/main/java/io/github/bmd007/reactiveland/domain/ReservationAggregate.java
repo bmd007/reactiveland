@@ -44,4 +44,8 @@ public class ReservationAggregate {
     public static ReservationAggregate createEmpty() {
         return ReservationAggregate.builder().status(JUST_CREATED).build();
     }
+
+    public boolean isFinalized(){
+        return this.status.equals(ReservationAggregate.ReservationStatus.FINALIZED);
+    }
 }
