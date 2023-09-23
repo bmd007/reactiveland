@@ -43,7 +43,7 @@ public class CancelReservationOnPaymentTimeoutApplication {
     public Mono<String> customer2ReserveAndPayInTime() {
         String customerId2 = UUID.randomUUID().toString();
         return kafkaEventProducer.produceEvent(new CustomerRequestedTable(customerId2, "table2"), Topics.CUSTOMER_EVENTS_TOPIC)
-                .delayElement(Duration.ofSeconds(10))
+                .delayElement(Duration.ofSeconds(15))
                 .map(ignored -> new CustomerPaidForReservation(customerId2, "payment2"))
                 .flatMap(event -> kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC))
                 .map(RecordMetadata::topic);

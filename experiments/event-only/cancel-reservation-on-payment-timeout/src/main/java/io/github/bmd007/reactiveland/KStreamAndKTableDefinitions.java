@@ -60,7 +60,7 @@ public class KStreamAndKTableDefinitions {
 
     @PostConstruct
     public void configureStores() {
-        TimeWindows timeWindows = TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(10));
+        TimeWindows timeWindows = TimeWindows.ofSizeAndGrace(Duration.ofSeconds(20), Duration.ofSeconds(5));
         streamsBuilder.stream(Topics.CUSTOMER_EVENTS_TOPIC, EVENT_CONSUMED)
                 .groupByKey(Grouped.with(Serdes.String(), EVENT_JSON_SERDE))
                 .windowedBy(timeWindows)
