@@ -61,7 +61,7 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
                             case 2 -> reserveTableAndLeave();
                             default -> Flux.error(new IllegalStateException("Unexpected value: " + integer % 3));
                         }
-                );
+                ).log();
         //when
         StepVerifier.create(booleanFlux)
                 //then
