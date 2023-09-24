@@ -3,6 +3,7 @@ package io.github.bmd007.reactiveland.event;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -26,8 +27,8 @@ public interface Event {
         return UUID.randomUUID().toString();
     }
 
-    default ZonedDateTime eventTime() {
-        return ZonedDateTime.now();
+    default Instant timestamp() {
+        return ZonedDateTime.now().minusMonths(1L).toInstant();
     }
 
     record DefaultEvent() implements Event {

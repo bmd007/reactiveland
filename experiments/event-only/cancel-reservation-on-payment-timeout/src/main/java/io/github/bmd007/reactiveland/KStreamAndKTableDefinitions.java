@@ -14,7 +14,9 @@ import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Suppressed;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.apache.kafka.streams.kstream.internals.suppress.StrictBufferConfigImpl;
 import org.apache.kafka.streams.state.WindowStore;
 import org.springframework.context.annotation.Configuration;
 
@@ -43,15 +45,16 @@ public class KStreamAndKTableDefinitions {
         this.kafkaEventProducer = kafkaEventProducer;
     }
 
-    private static TableReservation aggregation(String key, Event value, TableReservation aggregate) {
-        return switch (value) {
-            case CustomerRequestedTable customerRequestedTable -> aggregate.withTableId(customerRequestedTable.tableId()).awaitPayment(key);
+    private static TableReservation aggregation(String key, Event event, TableReservation aggregate) {
+        return switch (event) {
+            case CustomerRequestedTable customerRequestedTable ->
+                    aggregate.withTableId(customerRequestedTable.tableId()).awaitPayment(key);
             case CustomerPaidForReservation ignored -> {
                 try {
                     yield aggregate.paidFor();
                 } catch (Exception e) {
                     log.error("error when setting the table paid for {}", aggregate, e);
-                    yield aggregate;
+                    yield null;
                 }
             }
             default -> TableReservation.createTable();
@@ -60,11 +63,12 @@ public class KStreamAndKTableDefinitions {
 
     @PostConstruct
     public void configureStores() {
-        TimeWindows timeWindows = TimeWindows.ofSizeAndGrace(Duration.ofSeconds(20), Duration.ofSeconds(5));
+        TimeWindows timeWindows = TimeWindows.ofSizeAndGrace(Duration.ofSeconds(15), Duration.ofSeconds(5));
         streamsBuilder.stream(Topics.CUSTOMER_EVENTS_TOPIC, EVENT_CONSUMED)
                 .groupByKey(Grouped.with(Serdes.String(), EVENT_JSON_SERDE))
                 .windowedBy(timeWindows)
                 .aggregate(TableReservation::createTable, KStreamAndKTableDefinitions::aggregation, RESERVATION_LOCAL_KTABLE_MATERIALIZED)
+                .suppress(Suppressed.untilWindowCloses(new StrictBufferConfigImpl()))
                 .toStream()
                 .foreach((key, tableReservation) -> {
                     LocalTime startTime = ZonedDateTime.ofInstant(key.window().startTime(), ZoneId.systemDefault()).toLocalTime();
