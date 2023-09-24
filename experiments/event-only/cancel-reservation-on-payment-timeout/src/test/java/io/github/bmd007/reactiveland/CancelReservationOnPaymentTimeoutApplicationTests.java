@@ -49,7 +49,7 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
     @Test
     void contextLoads() {
         //given
-        Flux<String> booleanFlux = Flux.range(0, 9)
+        Flux<String> booleanFlux = Flux.range(0, 21)
                 .subscribeOn(Schedulers.parallel())
                 .publishOn(Schedulers.parallel())
                 .delayUntil(integer -> reserveAndPayForTable())
@@ -64,7 +64,7 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
         //when
         StepVerifier.create(booleanFlux)
                 //then
-                .expectNextCount(7)
+                .expectNextCount(22)
                 .expectComplete()
                 .verify();
     }
