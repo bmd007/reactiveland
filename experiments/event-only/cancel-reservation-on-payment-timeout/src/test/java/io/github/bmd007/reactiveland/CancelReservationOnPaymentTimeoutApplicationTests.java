@@ -48,14 +48,18 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
         webClient = WebClient.create("http://localhost:%s".formatted(localServerPort));
     }
 
-    record ExperimentResult(String customerId, String resultStatus, String methodName) {
-        public boolean wasSuccessful() {
+    record ExperimentResult(String customerId, String resultStatus, String methodName, Boolean wasSuccessful) {
+        public Boolean wasSuccessful() {
             return switch (methodName) {
                 case "reserveAndPayForTable" -> resultStatus.equals(PAID_FOR.name());
                 case "reserveTableAndLeave" -> resultStatus.equals(RESERVED_AWAITING_PAYMENT.name());
                 case "reserveTableAndPayLate" -> resultStatus.equals("404 NOT_FOUND");
                 default -> throw new IllegalStateException("Unexpected value: " + methodName);
             };
+        }
+
+        public Boolean getWasSuccessful(){
+            return wasSuccessful();
         }
     }
 
@@ -92,7 +96,7 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
                 .delayElement(Duration.ofSeconds(delay))
                 .map(ignored -> new Event.CustomerEvent.CustomerPaidForReservation(customerId, paymentId))
                 .flatMap(event -> kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC))
-                .delayElement(Duration.ofSeconds(10))
+                .delayElement(Duration.ofSeconds(2))
                 .flatMap(ignored -> webClient.get()
                         .uri("/api/tables/reservations/%s".formatted(customerId))
                         .retrieve()
@@ -100,7 +104,7 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
                 )
                 .map(TableReservationDto::status)
                 .onErrorResume(WebClientResponseException.class, exception -> Mono.just(exception.getStatusCode().toString()))
-                .map(status -> new ExperimentResult(customerId, status, "reserveAndPayForTable"));
+                .map(status -> new ExperimentResult(customerId, status, "reserveAndPayForTable", null));
     }
 
     private Mono<ExperimentResult> reserveTableAndLeave() {
@@ -117,7 +121,7 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
                 )
                 .map(TableReservationDto::status)
                 .onErrorResume(WebClientResponseException.class, exception -> Mono.just(exception.getStatusCode().toString()))
-                .map(status -> new ExperimentResult(customerId, status, "reserveTableAndLeave"));
+                .map(status -> new ExperimentResult(customerId, status, "reserveTableAndLeave", null));
     }
 
     private Mono<ExperimentResult> reserveTableAndPayLate() {
@@ -130,14 +134,14 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
                 .delayElement(Duration.ofSeconds(delay))
                 .map(ignored -> new Event.CustomerEvent.CustomerPaidForReservation(customerId, paymentId))
                 .flatMap(event -> kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC))
-                .delayElement(Duration.ofSeconds(10))
+                .delayElement(Duration.ofSeconds(2))
                 .flatMap(ignored -> webClient.get()
                         .uri("/api/tables/reservations/%s".formatted(customerId))
                         .retrieve()
                         .bodyToMono(String.class)
                         .onErrorResume(WebClientResponseException.class, exception -> Mono.just(exception.getStatusCode().toString()))
                 )
-                .map(status -> new ExperimentResult(customerId, status, "reserveTableAndPayLate"));
+                .map(status -> new ExperimentResult(customerId, status, "reserveTableAndPayLate", null));
     }
 
 }

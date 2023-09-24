@@ -130,7 +130,7 @@ public class ViewService<E, M, I> {
         if (metadata.activeHost().host().equals(ip) && metadata.activeHost().port() == port) {
             LOGGER.debug("Querying local store {} for id: {}", storeName, id);
             var store = waitUntilStoreIsQueryable();
-            return Mono.justOrEmpty(store.fetch(id, Instant.now().minusSeconds(20), Instant.now()))
+            return Mono.justOrEmpty(store.fetch(id, Instant.now().minusSeconds(9999), Instant.now()))
                     .filter(Iterator::hasNext)
                     .map(iWindowStoreIterator -> iWindowStoreIterator.next().value)
                     .map(i -> domainToDtoMapper.apply(id, i));//No data for that key locally
