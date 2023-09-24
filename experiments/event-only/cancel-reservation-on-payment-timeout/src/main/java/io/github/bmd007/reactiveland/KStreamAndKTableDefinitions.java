@@ -53,7 +53,7 @@ public class KStreamAndKTableDefinitions {
                 try {
                     yield aggregate.paidFor();
                 } catch (Exception e) {
-                    log.error("error when setting the table paid for {}", aggregate, e);
+//                    log.error("error when setting the table paid for {}", aggregate, e);
                     yield null;
                 }
             }
@@ -63,7 +63,7 @@ public class KStreamAndKTableDefinitions {
 
     @PostConstruct
     public void configureStores() {
-        TimeWindows timeWindows = TimeWindows.ofSizeAndGrace(Duration.ofSeconds(15), Duration.ofSeconds(5));
+        TimeWindows timeWindows = TimeWindows.ofSizeAndGrace(Duration.ofSeconds(15), Duration.ofSeconds(1));
         streamsBuilder.stream(Topics.CUSTOMER_EVENTS_TOPIC, EVENT_CONSUMED)
                 .groupByKey(Grouped.with(Serdes.String(), EVENT_JSON_SERDE))
                 .windowedBy(timeWindows)

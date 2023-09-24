@@ -1,6 +1,5 @@
 package io.github.bmd007.reactiveland.service;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -20,8 +19,8 @@ public class ViewResourcesClient {
 
     private final WebClient.Builder webClientBuilder;
 
-    public ViewResourcesClient(@Qualifier("notLoadBalancedClient") WebClient.Builder notLoadBalancedWebClientBuilder) {
-        webClientBuilder = notLoadBalancedWebClientBuilder;
+    public ViewResourcesClient(WebClient.Builder webClientBuilder) {
+        this.webClientBuilder = webClientBuilder;
     }
 
     public <T> Mono<T> getOne(Class<T> bodyType, String url) {
