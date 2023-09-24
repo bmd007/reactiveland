@@ -61,7 +61,7 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
                             case 2 -> reserveTableAndLeave();
                             default -> Flux.error(new IllegalStateException("Unexpected value: " + integer % 3));
                         }
-                ).log();
+                );
         //when
         StepVerifier.create(booleanFlux)
                 //then
@@ -75,7 +75,6 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
         long delay = 5L;
         String tableId = UUID.randomUUID().toString();
         String paymentId = UUID.randomUUID().toString();
-        log.info("reserveAndPayForTable for {}", customerId);
         return Mono.just(new Event.CustomerEvent.CustomerRequestedTable(customerId, tableId))
                 .flatMap(event -> kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC))
                 .delayElement(Duration.ofSeconds(delay))
@@ -96,7 +95,6 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
         String customerId = UUID.randomUUID().toString();
         long delay = 22L;
         String tableId = UUID.randomUUID().toString();
-        log.info("reserveTableAndLeave for {}", customerId);
         return Mono.just(new Event.CustomerEvent.CustomerRequestedTable(customerId, tableId))
                 .flatMap(event -> kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC))
                 .delayElement(Duration.ofSeconds(delay))
@@ -115,7 +113,6 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
         long delay = 20L;
         String tableId = UUID.randomUUID().toString();
         String paymentId = UUID.randomUUID().toString();
-        log.info("reserveTableAndPayLate for {}", customerId);
         return Mono.just(new Event.CustomerEvent.CustomerRequestedTable(customerId, tableId))
                 .flatMap(event -> kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC))
                 .delayElement(Duration.ofSeconds(delay))
