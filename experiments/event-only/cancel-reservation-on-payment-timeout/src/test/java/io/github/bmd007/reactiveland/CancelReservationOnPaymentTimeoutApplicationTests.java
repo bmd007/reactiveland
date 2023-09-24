@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpStatus;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -125,7 +124,6 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
                         .bodyToMono(String.class)
                         .onErrorResume(WebClientResponseException.class, exception -> Mono.just(exception.getStatusCode().toString()))
                 )
-                .map(httpStatusCode -> httpStatusCode.equals(HttpStatus.NOT_FOUND.toString()))
                 .map(s -> customerId + ":" + s + " : reserveTableAndPayLate");
     }
 
