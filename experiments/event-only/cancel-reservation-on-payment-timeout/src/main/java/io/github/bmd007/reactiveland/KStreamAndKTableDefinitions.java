@@ -75,6 +75,7 @@ public class KStreamAndKTableDefinitions {
                     if (tableReservation != null && tableReservation.isPaidFor()) {
                         log.info("{} is reserved for ", tableReservation.getTableId(), tableReservation.getCustomerId());
                     } else if (tableReservation == null || tableReservation.getTableId() == null) {
+                        //not sure if this branch ever happens
                         log.warn("late payment done by {}", key);
                     } else {
                         log.warn("reservation of table {} failed for customer {} due to no payment", tableReservation.getTableId(), tableReservation.getCustomerId());
