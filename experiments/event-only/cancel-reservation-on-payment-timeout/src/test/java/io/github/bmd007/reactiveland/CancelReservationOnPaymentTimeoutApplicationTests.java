@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpStatus;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -54,7 +53,7 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
             return switch (methodName) {
                 case "reserveAndPayForTable" -> resultStatus.equals(PAID_FOR.name());
                 case "reserveTableAndLeave" -> resultStatus.equals(RESERVED_AWAITING_PAYMENT.name());
-                case "reserveTableAndPayLate" -> resultStatus.equals(HttpStatus.NOT_FOUND.name());
+                case "reserveTableAndPayLate" -> resultStatus.equals("404 NOT_FOUND");
                 default -> throw new IllegalStateException("Unexpected value: " + methodName);
             };
         }
@@ -118,7 +117,7 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
                 )
                 .map(TableReservationDto::status)
                 .onErrorResume(WebClientResponseException.class, exception -> Mono.just(exception.getStatusCode().toString()))
-                .map(status -> new ExperimentResult(customerId, status, "reserveAndPayForTable"));
+                .map(status -> new ExperimentResult(customerId, status, "reserveTableAndLeave"));
     }
 
     private Mono<ExperimentResult> reserveTableAndPayLate() {
@@ -138,7 +137,7 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
                         .bodyToMono(String.class)
                         .onErrorResume(WebClientResponseException.class, exception -> Mono.just(exception.getStatusCode().toString()))
                 )
-                .map(status -> new ExperimentResult(customerId, status, "reserveAndPayForTable"));
+                .map(status -> new ExperimentResult(customerId, status, "reserveTableAndPayLate"));
     }
 
 }
