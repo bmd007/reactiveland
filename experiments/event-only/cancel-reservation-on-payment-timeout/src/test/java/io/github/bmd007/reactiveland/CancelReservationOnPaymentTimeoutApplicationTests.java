@@ -105,7 +105,7 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
                 )
                 .map(TableReservationDto::status)
                 .onErrorResume(WebClientResponseException.class, exception -> Mono.just(exception.getStatusCode().toString()))
-                .map(status -> new ExperimentResult(customerId, status, "reserveAndPayForTable", null));
+                .map(status -> new ExperimentResult(customerId, status, "reserveAndPayForTable"));
     }
 
     private Mono<ExperimentResult> reserveTableAndLeave() {
@@ -122,7 +122,7 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
                 )
                 .map(TableReservationDto::status)
                 .onErrorResume(WebClientResponseException.class, exception -> Mono.just(exception.getStatusCode().toString()))
-                .map(status -> new ExperimentResult(customerId, status, "reserveTableAndLeave", null));
+                .map(status -> new ExperimentResult(customerId, status, "reserveTableAndLeave"));
     }
 
     private Mono<ExperimentResult> reserveTableAndPayLate() {
@@ -142,7 +142,7 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
                         .bodyToMono(String.class)
                         .onErrorResume(WebClientResponseException.class, exception -> Mono.just(exception.getStatusCode().toString()))
                 )
-                .map(status -> new ExperimentResult(customerId, status, "reserveTableAndPayLate", null));
+                .map(status -> new ExperimentResult(customerId, status, "reserveTableAndPayLate"));
     }
 
 }
