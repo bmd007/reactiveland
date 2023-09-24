@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -23,6 +24,8 @@ import reactor.test.StepVerifier;
 import java.time.Duration;
 import java.util.UUID;
 
+import static io.github.bmd007.reactiveland.domain.TableReservation.Status.PAID_FOR;
+import static io.github.bmd007.reactiveland.domain.TableReservation.Status.RESERVED_AWAITING_PAYMENT;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -46,10 +49,21 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
         webClient = WebClient.create("http://localhost:%s".formatted(localServerPort));
     }
 
+    record ExperimentResult(String customerId, String resultStatus, String methodName) {
+        public boolean wasSuccessful() {
+            return switch (methodName) {
+                case "reserveAndPayForTable" -> resultStatus.equals(PAID_FOR.name());
+                case "reserveTableAndLeave" -> resultStatus.equals(RESERVED_AWAITING_PAYMENT.name());
+                case "reserveTableAndPayLate" -> resultStatus.equals(HttpStatus.NOT_FOUND.name());
+                default -> throw new IllegalStateException("Unexpected value: " + methodName);
+            };
+        }
+    }
+
     @Test
     void contextLoads() {
         //given
-        Flux<String> booleanFlux = Flux.range(0, 21)
+        Flux<ExperimentResult> booleanFlux = Flux.range(0, 21)
                 .subscribeOn(Schedulers.parallel())
                 .publishOn(Schedulers.parallel())
                 .delayUntil(integer -> reserveAndPayForTable())
@@ -64,12 +78,12 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
         //when
         StepVerifier.create(booleanFlux)
                 //then
-                .expectNextCount(22)
+                .expectNextCount(21)
                 .expectComplete()
                 .verify();
     }
 
-    private Mono<String> reserveAndPayForTable() {
+    private Mono<ExperimentResult> reserveAndPayForTable() {
         String customerId = UUID.randomUUID().toString();
         long delay = 5L;
         String tableId = UUID.randomUUID().toString();
@@ -87,10 +101,10 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
                 )
                 .map(TableReservationDto::status)
                 .onErrorResume(WebClientResponseException.class, exception -> Mono.just(exception.getStatusCode().toString()))
-                .map(s -> customerId + ":" + s + " : reserveAndPayForTable");
+                .map(status -> new ExperimentResult(customerId, status, "reserveAndPayForTable"));
     }
 
-    private Mono<String> reserveTableAndLeave() {
+    private Mono<ExperimentResult> reserveTableAndLeave() {
         String customerId = UUID.randomUUID().toString();
         long delay = 22L;
         String tableId = UUID.randomUUID().toString();
@@ -104,10 +118,10 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
                 )
                 .map(TableReservationDto::status)
                 .onErrorResume(WebClientResponseException.class, exception -> Mono.just(exception.getStatusCode().toString()))
-                .map(s -> customerId + ":" + s + " : reserveTableAndLeave");
+                .map(status -> new ExperimentResult(customerId, status, "reserveAndPayForTable"));
     }
 
-    private Mono<String> reserveTableAndPayLate() {
+    private Mono<ExperimentResult> reserveTableAndPayLate() {
         String customerId = UUID.randomUUID().toString();
         long delay = 20L;
         String tableId = UUID.randomUUID().toString();
@@ -124,7 +138,7 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
                         .bodyToMono(String.class)
                         .onErrorResume(WebClientResponseException.class, exception -> Mono.just(exception.getStatusCode().toString()))
                 )
-                .map(s -> customerId + ":" + s + " : reserveTableAndPayLate");
+                .map(status -> new ExperimentResult(customerId, status, "reserveAndPayForTable"));
     }
 
 }
