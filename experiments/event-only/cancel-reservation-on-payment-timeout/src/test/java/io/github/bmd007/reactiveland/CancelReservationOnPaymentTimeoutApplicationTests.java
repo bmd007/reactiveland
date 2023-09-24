@@ -49,17 +49,18 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
     }
 
     record ExperimentResult(String customerId, String resultStatus, String methodName, Boolean wasSuccessful) {
-        public Boolean wasSuccessful() {
+
+        public ExperimentResult(String customerId, String resultStatus, String methodName){
+            this(customerId, resultStatus, methodName, wasSuccessful(methodName, resultStatus));
+        }
+
+        private static Boolean wasSuccessful(String methodName, String resultStatus) {
             return switch (methodName) {
                 case "reserveAndPayForTable" -> resultStatus.equals(PAID_FOR.name());
                 case "reserveTableAndLeave" -> resultStatus.equals(RESERVED_AWAITING_PAYMENT.name());
                 case "reserveTableAndPayLate" -> resultStatus.equals("404 NOT_FOUND");
                 default -> throw new IllegalStateException("Unexpected value: " + methodName);
             };
-        }
-
-        public Boolean getWasSuccessful(){
-            return wasSuccessful();
         }
     }
 
