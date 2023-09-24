@@ -70,10 +70,18 @@ public class KStreamAndKTableDefinitions {
                 .aggregate(TableReservation::createTable, KStreamAndKTableDefinitions::aggregation, RESERVATION_LOCAL_KTABLE_MATERIALIZED)
                 .suppress(Suppressed.untilWindowCloses(new StrictBufferConfigImpl()))
                 .toStream()
-                .foreach((key, tableReservation) -> {
+                .peek((key, tableReservation) -> {
+                    // we can produce events into other topic to update the actual state machine of orders
+                    if (tableReservation != null && tableReservation.isPaidFor()) {
+                        log.info("{} is reserved for ", tableReservation.getTableId(), tableReservation.getCustomerId());
+                    } else if (tableReservation == null || tableReservation.getTableId() == null) {
+                        log.warn("late payment done by {}", key);
+                    } else {
+                        log.warn("reservation of table {} failed for customer {} due to no payment", tableReservation.getTableId(), tableReservation.getCustomerId());
+                    }
                     LocalTime startTime = ZonedDateTime.ofInstant(key.window().startTime(), ZoneId.systemDefault()).toLocalTime();
                     LocalTime endTime = ZonedDateTime.ofInstant(key.window().endTime(), ZoneId.systemDefault()).toLocalTime();
-                    log.info("{}:{} --- {}:{}", key.key(), tableReservation, startTime.getSecond(), endTime.getSecond());
+                    log.info("window length {}:{}", startTime, endTime);
                 });
     }
 }

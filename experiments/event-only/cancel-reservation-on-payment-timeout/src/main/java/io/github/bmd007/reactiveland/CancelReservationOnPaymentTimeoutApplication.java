@@ -29,6 +29,8 @@ public class CancelReservationOnPaymentTimeoutApplication {
     private KafkaEventProducer kafkaEventProducer;
 
 
+    //todo turn these API calls into automated tests involving threads
+
     @GetMapping("/customer1")
     public Mono<String> customer1ReserveAndPayInTime() {
         String customerId1 = UUID.randomUUID().toString();

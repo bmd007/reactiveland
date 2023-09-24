@@ -57,6 +57,6 @@ public class TableReservation {
     }
 
     public boolean isPaidFor() {
-        return tableId != null && customerId != null && this.status.equals(Status.PAID_FOR);
+        return tableId != null && customerId != null && status != null && status.equals(Status.PAID_FOR);
     }
 }
