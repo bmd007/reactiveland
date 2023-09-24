@@ -73,7 +73,7 @@ public class KStreamAndKTableDefinitions {
                 .peek((key, tableReservation) -> {
                     // we can produce events into other topic to update the actual state machine of orders
                     if (tableReservation != null && tableReservation.isPaidFor()) {
-                        log.info("{} is reserved for ", tableReservation.getTableId(), tableReservation.getCustomerId());
+                        log.info("{} is reserved for {}", tableReservation.getTableId(), tableReservation.getCustomerId());
                     } else if (tableReservation == null || tableReservation.getTableId() == null) {
                         //not sure if this branch ever happens
                         log.warn("late payment done by {}", key);
