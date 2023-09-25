@@ -78,14 +78,6 @@ public class KStreamAndKTableDefinitions {
                 .foreach((key, tableReservation) -> {
                     log.info("BMD:: \n final {} ", tableReservation);
                     // we can produce events into other topic to update the actual state machine of orders
-                    if (tableReservation != null && tableReservation.isPaidFor()) {
-                        log.info("{} is reserved for {}", tableReservation.getTableId(), tableReservation.getCustomerId());
-                    } else if (tableReservation == null || tableReservation.getTableId() == null) {
-                        //not sure if this branch ever happens
-                        log.error("late payment done by {}", key);
-                    } else {
-                        log.error("reservation of table {} failed for customer {} due to no payment", tableReservation.getTableId(), tableReservation.getCustomerId());
-                    }
                     LocalTime startTime = ZonedDateTime.ofInstant(key.window().startTime(), ZoneId.systemDefault()).toLocalTime();
                     LocalTime endTime = ZonedDateTime.ofInstant(key.window().endTime(), ZoneId.systemDefault()).toLocalTime();
                     log.info("window length {}:{}", startTime, endTime);
