@@ -60,10 +60,10 @@ public class KStreamAndKTableDefinitions {
                     }
                 } catch (Exception e) {
                     log.error("error when setting the table paid for {}", currentTableReservation, e);
-                    yield TableReservation.createTableReservation();
+                    yield null;
                 }
             }
-            default -> TableReservation.createTableReservation();
+            default -> null;
         };
         log.info("BMD:: \n event {} -- current {} -- \n next {} ", event, currentTableReservation, newTableReservation);
         return newTableReservation;

@@ -7,3 +7,13 @@ kafka:
     config:
       event: '1:1'
       changelog: '1:1'
+
+
+
+logging:
+  level:
+    org.springframework.jdbc: INFO
+    org.springframework.web: INFO
+    org.springframework.kafka: WARN
+    org.apache.kafka: ERROR
+    kafka: ERROR
