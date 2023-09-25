@@ -77,7 +77,7 @@ public class KStreamAndKTableDefinitions {
                 .foreach((key, tableReservation) -> {
                     log.info("BMD:: \n final {} ", tableReservation);
                     // we can produce events into other topic to update the actual state machine of orders
-
+                    // todo: we don't get the trigger for time out.  We end up here when paid, either on time or late. But not when timedout.
                     LocalTime startTime = LocalTime.ofInstant(key.window().startTime(), ZoneId.of("Europe/Stockholm"));
                     LocalTime endTime = LocalTime.ofInstant(key.window().endTime(), ZoneId.of("Europe/Stockholm"));
                     log.info("window length {}:{}", startTime, endTime);
