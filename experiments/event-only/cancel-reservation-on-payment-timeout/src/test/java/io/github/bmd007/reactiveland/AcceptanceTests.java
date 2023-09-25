@@ -111,7 +111,8 @@ class AcceptanceTests {
 
     private Mono<RecordMetadata> requestTable(String customerId, String TABLE_ID) {
         var event = new Event.CustomerEvent.CustomerRequestedTable(customerId, TABLE_ID);
-        return kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC);
+        return kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC)
+                .log("BMD::requestTable");
     }
 
     private Mono<RecordMetadata> payForTable(String customerId, String TABLE_ID) {
