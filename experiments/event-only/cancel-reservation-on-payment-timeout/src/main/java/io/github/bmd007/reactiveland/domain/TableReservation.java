@@ -25,11 +25,10 @@ public class TableReservation {
 
     public TableReservation paidFor() {
         if (tableId == null) {
-            //getting here means payment is done too late.
             throw new IllegalStateException("table id null");
         }
         if (isAvailable() || !status.equals(RESERVED_AWAITING_PAYMENT)) {
-            throw new IllegalStateException("not awaiting payment or not initialized yet");
+            throw new IllegalStateException("not awaiting payment or no customerId");
         }
         return withStatus(PAID_FOR);
     }

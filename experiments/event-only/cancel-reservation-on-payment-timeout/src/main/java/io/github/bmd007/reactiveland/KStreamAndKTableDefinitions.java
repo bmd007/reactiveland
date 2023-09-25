@@ -49,12 +49,17 @@ public class KStreamAndKTableDefinitions {
 
     private static TableReservation aggregation(String key, Event event, TableReservation currentTableReservation) {
         TableReservation newTableReservation = switch (event) {
-            case CustomerRequestedTable customerRequestedTable ->
-                    currentTableReservation.withTableId(customerRequestedTable.tableId()).awaitPayment(key);
+            case CustomerRequestedTable customerRequestedTable -> {
+                if (currentTableReservation.getTableId() == null) {
+                    yield currentTableReservation.withTableId(customerRequestedTable.tableId()).awaitPayment(key);
+                }
+                log.error("does not support parallel reservation per customer yet");
+                yield null;
+            }
             case CustomerPaidForTable customerPaidForTable -> {
                 try {
-                    if (currentTableReservation.getTableId() == null
-                            || (currentTableReservation.getTableId().equals(customerPaidForTable.customerId()))) {
+                    if (currentTableReservation.getTableId() != null
+                            && currentTableReservation.getTableId().equals(customerPaidForTable.customerId())) {
                         yield currentTableReservation.paidFor();
                     }
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "does not support parallel reservation per customer yet");
