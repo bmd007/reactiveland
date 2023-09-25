@@ -24,13 +24,14 @@ public class TableReservation {
     String customerId;
 
     public TableReservation paidFor() {
-        if (tableId == null) {
-            throw new IllegalStateException("table id null");
+        if (isPayable()) {
+            return withStatus(PAID_FOR);
         }
-        if (isAvailable() || !status.equals(RESERVED_AWAITING_PAYMENT)) {
-            throw new IllegalStateException("not awaiting payment or no customerId");
-        }
-        return withStatus(PAID_FOR);
+        throw new IllegalStateException("not payable");
+    }
+
+    public boolean isPayable() {
+        return tableId != null && !isAvailable() && status.equals(RESERVED_AWAITING_PAYMENT);
     }
 
     public TableReservation awaitPayment(String customerId) {

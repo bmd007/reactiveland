@@ -19,8 +19,6 @@ import org.apache.kafka.streams.kstream.TimeWindows;
 import org.apache.kafka.streams.kstream.internals.suppress.StrictBufferConfigImpl;
 import org.apache.kafka.streams.state.WindowStore;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
 import java.time.LocalTime;
@@ -56,16 +54,11 @@ public class KStreamAndKTableDefinitions {
                 log.error("does not support parallel reservation per customer yet");
                 yield null;
             }
-            case CustomerPaidForTable customerPaidForTable -> {
+            case CustomerPaidForTable ignored -> {
                 try {
-                    if (currentTableReservation.getTableId() == null) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "table id is null");
-                    } else if (currentTableReservation.getTableId().equals(customerPaidForTable.tableId())) {
-                        yield currentTableReservation.paidFor();
-                    }
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "does not support parallel reservation per customer yet");
+                    yield currentTableReservation.paidFor();
                 } catch (Exception e) {
-                    log.error("error when setting the table paid for {}", currentTableReservation, e);
+                    log.error("error when setting the table reservation {} status to paid for", currentTableReservation, e);
                     yield null;
                 }
             }
