@@ -2,6 +2,7 @@ package io.github.bmd007.reactiveland.event;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import jakarta.annotation.Nonnull;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -54,10 +55,10 @@ public interface Event {
         record DefaultCustomerEvent(String customerId) implements CustomerEvent {
         }
 
-        record CustomerRequestedTable(String customerId, String tableId) implements CustomerEvent {
+        record CustomerRequestedTable(String customerId, @Nonnull String tableId) implements CustomerEvent {
         }
 
-        record CustomerPaidForTable(String customerId, String tableId) implements CustomerEvent {
+        record CustomerPaidForTable(String customerId, @Nonnull String tableId) implements CustomerEvent {
         }
     }
 
