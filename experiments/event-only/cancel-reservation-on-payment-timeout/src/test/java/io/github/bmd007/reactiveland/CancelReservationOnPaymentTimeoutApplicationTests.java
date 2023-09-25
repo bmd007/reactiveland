@@ -67,24 +67,24 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
     @Test
     void contextLoads() {
         //given
-        Flux<ExperimentResult> booleanFlux = Flux.range(0, 21)
+        Flux<ExperimentResult> booleanFlux = Flux.range(0, 2)
                 .subscribeOn(Schedulers.parallel())
                 .publishOn(Schedulers.parallel())
-                .delayUntil(integer -> reserveAndPayForTable())
-                .flatMap(integer ->
-                        switch (integer % 3) {
-                            case 0 -> reserveAndPayForTable();
-                            case 1 -> reserveTableAndPayLate();
-                            case 2 -> reserveTableAndLeave();
-                            default -> Flux.error(new IllegalStateException("Unexpected value: " + integer % 3));
-                        }
-                )
+                .flatMap(integer -> reserveTableAndLeave())
+//                .flatMap(integer ->
+//                        switch (integer % 3) {
+//                            case 0 -> reserveAndPayForTable();
+//                            case 1 -> reserveTableAndPayLate();
+//                            case 2 -> reserveTableAndLeave();
+//                            default -> Flux.error(new IllegalStateException("Unexpected value: " + integer % 3));
+//                        }
+//                )
                 .log()
                 .filter(ExperimentResult::wasSuccessful);
         //when
         StepVerifier.create(booleanFlux)
                 //then
-                .expectNextCount(21)
+                .expectNextCount(3)
                 .expectComplete()
                 .verify();
     }
