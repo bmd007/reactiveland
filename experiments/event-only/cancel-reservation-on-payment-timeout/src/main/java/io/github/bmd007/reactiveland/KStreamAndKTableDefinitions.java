@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Configuration;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 
 import static io.github.bmd007.reactiveland.serialization.CustomSerdes.*;
 
@@ -78,8 +77,9 @@ public class KStreamAndKTableDefinitions {
                 .foreach((key, tableReservation) -> {
                     log.info("BMD:: \n final {} ", tableReservation);
                     // we can produce events into other topic to update the actual state machine of orders
-                    LocalTime startTime = ZonedDateTime.ofInstant(key.window().startTime(), ZoneId.systemDefault()).toLocalTime();
-                    LocalTime endTime = ZonedDateTime.ofInstant(key.window().endTime(), ZoneId.systemDefault()).toLocalTime();
+
+                    LocalTime startTime = LocalTime.ofInstant(key.window().startTime(), ZoneId.of("Europe/Stockholm"));
+                    LocalTime endTime = LocalTime.ofInstant(key.window().endTime(), ZoneId.of("Europe/Stockholm"));
                     log.info("window length {}:{}", startTime, endTime);
                 });
     }
