@@ -14,9 +14,7 @@ import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.Materialized;
-import org.apache.kafka.streams.kstream.Suppressed;
 import org.apache.kafka.streams.kstream.TimeWindows;
-import org.apache.kafka.streams.kstream.internals.suppress.StrictBufferConfigImpl;
 import org.apache.kafka.streams.state.WindowStore;
 import org.springframework.context.annotation.Configuration;
 
@@ -72,12 +70,14 @@ public class KStreamAndKTableDefinitions {
                 .groupByKey(Grouped.with(Serdes.String(), EVENT_JSON_SERDE))
                 .windowedBy(timeWindows)
                 .aggregate(TableReservation::createTableReservation, KStreamAndKTableDefinitions::aggregation, RESERVATION_LOCAL_KTABLE_MATERIALIZED)
-                .suppress(Suppressed.untilWindowCloses(new StrictBufferConfigImpl()))
+//                .suppress(Suppressed.untilWindowCloses(new StrictBufferConfigImpl()))
                 .toStream()
                 .foreach((key, tableReservation) -> {
                     log.info("BMD:: \n final {} ", tableReservation);
                     // we can produce events into other topic to update the actual state machine of orders
                     // todo: we don't get the trigger for time out.  We end up here when paid, either on time or late. But not when timedout.
+                    // the suppress messes things up somehow.
+                    // also apparently the window sometimes gets closed to early
                     LocalTime startTime = LocalTime.ofInstant(key.window().startTime(), ZoneId.of("Europe/Stockholm"));
                     LocalTime endTime = LocalTime.ofInstant(key.window().endTime(), ZoneId.of("Europe/Stockholm"));
                     log.info("window length {}:{}", startTime, endTime);
