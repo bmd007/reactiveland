@@ -78,7 +78,9 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
                             case 2 -> reserveTableAndLeave();
                             default -> Flux.error(new IllegalStateException("Unexpected value: " + integer % 3));
                         }
-                ).log();
+                )
+                .log()
+                .filter(ExperimentResult::wasSuccessful);
         //when
         StepVerifier.create(booleanFlux)
                 //then
@@ -91,11 +93,10 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
         String customerId = UUID.randomUUID().toString();
         long delay = 5L;
         String tableId = UUID.randomUUID().toString();
-        String paymentId = UUID.randomUUID().toString();
         return Mono.just(new Event.CustomerEvent.CustomerRequestedTable(customerId, tableId))
                 .flatMap(event -> kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC))
                 .delayElement(Duration.ofSeconds(delay))
-                .map(ignored -> new Event.CustomerEvent.CustomerPaidForReservation(customerId, paymentId))
+                .map(ignored -> new Event.CustomerEvent.CustomerPaidForTable(customerId, tableId))
                 .flatMap(event -> kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC))
                 .delayElement(Duration.ofSeconds(2))
                 .flatMap(ignored -> webClient.get()
@@ -129,11 +130,10 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
         String customerId = UUID.randomUUID().toString();
         long delay = 20L;
         String tableId = UUID.randomUUID().toString();
-        String paymentId = UUID.randomUUID().toString();
         return Mono.just(new Event.CustomerEvent.CustomerRequestedTable(customerId, tableId))
                 .flatMap(event -> kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC))
                 .delayElement(Duration.ofSeconds(delay))
-                .map(ignored -> new Event.CustomerEvent.CustomerPaidForReservation(customerId, paymentId))
+                .map(ignored -> new Event.CustomerEvent.CustomerPaidForTable(customerId, tableId))
                 .flatMap(event -> kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC))
                 .delayElement(Duration.ofSeconds(2))
                 .flatMap(ignored -> webClient.get()

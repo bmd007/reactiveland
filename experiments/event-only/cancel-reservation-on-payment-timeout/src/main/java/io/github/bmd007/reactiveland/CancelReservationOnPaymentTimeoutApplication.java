@@ -2,7 +2,7 @@ package io.github.bmd007.reactiveland;
 
 import io.github.bmd007.reactiveland.configuration.KafkaEventProducer;
 import io.github.bmd007.reactiveland.configuration.Topics;
-import io.github.bmd007.reactiveland.event.Event.CustomerEvent.CustomerPaidForReservation;
+import io.github.bmd007.reactiveland.event.Event.CustomerEvent.CustomerPaidForTable;
 import io.github.bmd007.reactiveland.event.Event.CustomerEvent.CustomerRequestedTable;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.RecordMetadata;
@@ -36,7 +36,7 @@ public class CancelReservationOnPaymentTimeoutApplication {
         String customerId1 = UUID.randomUUID().toString();
         return kafkaEventProducer.produceEvent(new CustomerRequestedTable(customerId1, "table1"), Topics.CUSTOMER_EVENTS_TOPIC)
                 .delayElement(Duration.ofSeconds(5))
-                .map(ignored -> new CustomerPaidForReservation(customerId1, "payment1"))
+                .map(ignored -> new CustomerPaidForTable(customerId1, "table1"))
                 .flatMap(event -> kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC))
                 .map(RecordMetadata::topic);
     }
@@ -46,7 +46,7 @@ public class CancelReservationOnPaymentTimeoutApplication {
         String customerId2 = UUID.randomUUID().toString();
         return kafkaEventProducer.produceEvent(new CustomerRequestedTable(customerId2, "table2"), Topics.CUSTOMER_EVENTS_TOPIC)
                 .delayElement(Duration.ofSeconds(15))
-                .map(ignored -> new CustomerPaidForReservation(customerId2, "payment2"))
+                .map(ignored -> new CustomerPaidForTable(customerId2, "table2"))
                 .flatMap(event -> kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC))
                 .map(RecordMetadata::topic);
     }

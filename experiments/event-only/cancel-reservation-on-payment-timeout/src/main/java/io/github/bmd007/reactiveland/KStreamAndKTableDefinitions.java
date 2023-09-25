@@ -5,7 +5,7 @@ import io.github.bmd007.reactiveland.configuration.StateStores;
 import io.github.bmd007.reactiveland.configuration.Topics;
 import io.github.bmd007.reactiveland.domain.TableReservation;
 import io.github.bmd007.reactiveland.event.Event;
-import io.github.bmd007.reactiveland.event.Event.CustomerEvent.CustomerPaidForReservation;
+import io.github.bmd007.reactiveland.event.Event.CustomerEvent.CustomerPaidForTable;
 import io.github.bmd007.reactiveland.event.Event.CustomerEvent.CustomerRequestedTable;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +19,8 @@ import org.apache.kafka.streams.kstream.TimeWindows;
 import org.apache.kafka.streams.kstream.internals.suppress.StrictBufferConfigImpl;
 import org.apache.kafka.streams.state.WindowStore;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
 import java.time.LocalTime;
@@ -49,9 +51,13 @@ public class KStreamAndKTableDefinitions {
         return switch (event) {
             case CustomerRequestedTable customerRequestedTable ->
                     aggregate.withTableId(customerRequestedTable.tableId()).awaitPayment(key);
-            case CustomerPaidForReservation ignored -> {
+            case CustomerPaidForTable customerPaidForTable -> {
                 try {
-                    yield aggregate.paidFor();
+                    if (customerPaidForTable.tableId().equals(aggregate.getTableId())){
+                        yield aggregate.paidFor();
+                    } else {
+                      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "does not support parallel reservation per customer yet");
+                    }
                 } catch (Exception e) {
 //                    log.error("error when setting the table paid for {}", aggregate, e);
                     yield null;
