@@ -48,37 +48,36 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
         webClient = WebClient.create("http://localhost:%s".formatted(localServerPort));
     }
 
-    record ExperimentResult(String customerId, String resultStatus, String methodName, Boolean wasSuccessful) {
+    record ExperimentResult(String customerId, String resultStatus, String methodName, boolean wasSuccessful) {
 
         public ExperimentResult(String customerId, String resultStatus, String methodName){
             this(customerId, resultStatus, methodName, wasSuccessful(methodName, resultStatus));
         }
 
-        private static Boolean wasSuccessful(String methodName, String resultStatus) {
+        private static boolean wasSuccessful(String methodName, String resultStatus) {
             return switch (methodName) {
                 case "reserveAndPayForTable" -> resultStatus.equals(PAID_FOR.name());
-                case "reserveTableAndLeave" -> resultStatus.equals(RESERVED_AWAITING_PAYMENT.name());
-                case "reserveTableAndPayLate" -> resultStatus.equals("404 NOT_FOUND");
+                case "reserveTableAndLeave" -> resultStatus.equals("404 NOT_FOUND");
+                case "reserveTableAndPayLate" -> resultStatus.equals(RESERVED_AWAITING_PAYMENT.name());
                 default -> throw new IllegalStateException("Unexpected value: " + methodName);
             };
         }
     }
 
     @Test
-    void contextLoads() {
+    void paymentTimeoutDetectionTest() {
         //given
-        Flux<ExperimentResult> booleanFlux = Flux.range(0, 2)
+        Flux<ExperimentResult> booleanFlux = Flux.range(1, 3)
                 .subscribeOn(Schedulers.parallel())
                 .publishOn(Schedulers.parallel())
-                .flatMap(integer -> reserveTableAndLeave())
-//                .flatMap(integer ->
-//                        switch (integer % 3) {
-//                            case 0 -> reserveAndPayForTable();
-//                            case 1 -> reserveTableAndPayLate();
-//                            case 2 -> reserveTableAndLeave();
-//                            default -> Flux.error(new IllegalStateException("Unexpected value: " + integer % 3));
-//                        }
-//                )
+                .flatMap(integer ->
+                        switch (integer % 3) {
+                            case 0 -> reserveAndPayForTable();
+                            case 1 -> reserveTableAndPayLate();
+                            case 2 -> reserveTableAndLeave();
+                            default -> Flux.error(new IllegalStateException("Unexpected value: " + integer % 3));
+                        }
+                )
                 .log()
                 .filter(ExperimentResult::wasSuccessful);
         //when
@@ -139,7 +138,8 @@ class CancelReservationOnPaymentTimeoutApplicationTests {
                 .flatMap(ignored -> webClient.get()
                         .uri("/api/tables/reservations/%s".formatted(customerId))
                         .retrieve()
-                        .bodyToMono(String.class)
+                        .bodyToMono(TableReservationDto.class)
+                        .map(TableReservationDto::status)
                         .onErrorResume(WebClientResponseException.class, exception -> Mono.just(exception.getStatusCode().toString()))
                 )
                 .map(status -> new ExperimentResult(customerId, status, "reserveTableAndPayLate"));
