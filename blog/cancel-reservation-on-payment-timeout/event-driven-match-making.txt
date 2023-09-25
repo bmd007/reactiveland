@@ -1,0 +1,78 @@
+# Events, my dear boy, events.
+
+## Event driven solution for reservation cancellation due to payment time out (using KafkaStreams windows).
+
+### What do you gain by reading this post?
+If you are generally familiar with Event-Driven systems and KafkaStreams, you will benefit the most from this article,
+where a solution for detecting payment timeout is described.
+This solution tries to only rely on real-time event processing and not involving blocking behavior.
+There are so many cases in which timeout detection is a required feature of the system.
+Some examples are:
+ - Reserve a seat/ticket/table/... and keep the reservation only for a certain time until the payment is done.
+Late payment won't be possible and results in cancellation of reservation.
+ - Retrying something that is done once, failed, and needs to be done again (asynchronously) after a certain amount of time.
+
+
+### Story
+Alice reserves a table on a restaurant application.
+She sees that she needs to pay for her reservation within next 15 minutes.
+She completes the payment process then gets notified by the application that her reservation is finalized.
+
+Bob does to same thing but fails to pay within 15 minutes.
+He realizes that his selected table is not reserved for him anymore, and he needs to start from scratch.
+
+### Context
+ - All will use events and state stores.
+ - I Assume you have general knowledge of Event-Driven systems.
+ - We are going to use KafkaStreams and stream processing notions which I assume you know enough about them.
+ - This post is not about stream processing being a good or bad approach here. Rather, a thought experiment on Event-Driven systems.
+ - A similar simpler solution can be imagined which doesn't involve KafkaStreams. I'll cover that in another blog post.
+ - This solution only covers the part that is about detecting the timeout. Table selection, payment tracking, order management, and ... won't be covered.
+
+### Event storming
+ - Alice has requested a table
+ - Alice has paid for a table
+
+### Common language
+ - Alice requesting a table (and system accepting it) means that the requested table will not be available to be requested for other people.
+The table becomes available again if Alice fails to pay the reservation fee in time.
+Also, Alice can pay for the table in time which means that the table becomes available again if Alice cancels her reservation.
+
+### Event definitions
+ - CustomerRequestedTable(CustomerId, TableId): keyed with customerId.
+ - CustomerPaidForTable(CustomerId, TableId): keyed with customerId.
+
+These events will be published in the same topic.
+
+### Windows
+ - A KafkaStreams TimeWindows applied on the stream of events mentioned above.
+The size of this window in the timeout threshold (expire time/wait before retry).
+For each event with a specific key, we either already have a window open.
+Or we start a new window upon arrival of the event.
+Each window will have a state keyed with customerId.
+The state will be updated according the arriving events that are not late.
+The state of the window is basically a KafkaStreams KTable which is described below.
+
+### KTables
+ - ReservationStatus<CustomerId, ReservationStatus>: created using events defined above.
+ CustomerRequestedTable initializes a record in the table for the corresponding customer with state "AWAITING_PAYMENT".
+ If CustomerPaidForTable arrives soon enough, that record will change to "PAID_FOR".
+
+
+### General idea
+Each time a window is closed, its final state will be accessible to be processed like an event in an event handler of sort.
+At that moment, we know that the window has closed plus the state of window before closure.
+So we can check if the state is "PAID_FOR", or still "AWAITING_PAYMENT".
+That state would be our final answer for that table reservation, which can be propagated to other components of the system using other events.
+
+Assuming window size is 15 minutes:
+1- Alice:AliceRequestedTable2 At 14:00 ==> A new window is created with Alice:{Table2,AWAITING_PAYMENT} as state.
+2- Alice:AlicePaidForTable2 at 14:10 ==> state of the window updated to Alice:{Table2, PAID_FOR}.
+3- Window gets closed ==> state is Alice:{Table2, PAID_FOR} ==> no cancellation is needed.
+
+4- Joe:JoeRequestedTable5 at 13:30 ==> A new window is created with Joe:{Table5,AWAITING_PAYMENT} as state.
+5- Window gets closed ==> state is Joe:{Table5,AWAITING_PAYMENT} ==> payment timed out ==> table5 is available again.
+
+img.png
+
+### [Sample implementation](https://github.com/bmd007/reactiveland/blob/b8936cdae55de78306622c563080af0a01e2a04b/experiments/event-only/cancel-reservation-on-payment-timeout/src/main/java/io/github/bmd007/reactiveland/KStreamAndKTableDefinitions.java#L71)
