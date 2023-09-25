@@ -67,6 +67,21 @@ class AcceptanceTests {
                 .verify();
     }
 
+    @Test
+    void reserveTableAndLeaveDoubleTry() {
+        //given
+        Mono<ExperimentResult> booleanFlux = reserveTableAndLeave()
+                .delayUntil(experimentResult -> reserveTableAndLeave())
+                .log()
+                .filter(ExperimentResult::wasSuccessful);
+        //when
+        StepVerifier.create(booleanFlux)
+                //then
+                .expectNextCount(1)
+                .expectComplete()
+                .verify();
+    }
+
     private Mono<ExperimentResult> reserveAndPayForTable() {
         String customerId = UUID.randomUUID().toString();
         long delay = 5L;
