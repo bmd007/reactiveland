@@ -52,7 +52,7 @@ public class TableReservation {
         return withCustomerId(null).withStatus(AVAILABLE);
     }
 
-    public static TableReservation createTable() {
+    public static TableReservation createTableReservation() {
         return TableReservation.builder().status(AVAILABLE).build();
     }
 

@@ -130,7 +130,7 @@ public class ViewService<E, M, I> {
         if (metadata.activeHost().host().equals(ip) && metadata.activeHost().port() == port) {
             LOGGER.debug("Querying local store {} for id: {}", storeName, id);
             var store = waitUntilStoreIsQueryable();
-            return Mono.justOrEmpty(store.backwardFetch(id, Instant.now().minusSeconds(30), Instant.now()))
+            return Mono.justOrEmpty(store.backwardFetch(id, Instant.now().minusSeconds(16), Instant.now()))
                     .filter(Iterator::hasNext)
                     .map(iWindowStoreIterator -> iWindowStoreIterator.next().value)
                     .map(i -> domainToDtoMapper.apply(id, i));//No data for that key locally
@@ -152,7 +152,7 @@ public class ViewService<E, M, I> {
 
         LOGGER.debug("Querying local part of global store {} for id: {}", storeName, id);
         var store = waitUntilStoreIsQueryable();
-        return Mono.justOrEmpty(store.backwardFetch(id, Instant.now().minusSeconds(30), Instant.now()))
+        return Mono.justOrEmpty(store.backwardFetch(id, Instant.now().minusSeconds(16), Instant.now()))
                 .filter(Iterator::hasNext)
                 .map(iWindowStoreIterator -> iWindowStoreIterator.next().value)
                 .map(i -> domainToDtoMapper.apply(id, i));//No data for that key locally

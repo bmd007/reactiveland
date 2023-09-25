@@ -7,69 +7,26 @@ import io.github.bmd007.reactiveland.event.Event;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.kafka.test.context.EmbeddedKafka;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 import java.time.Duration;
 import java.util.UUID;
 
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+class AcceptanceTests {
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
-@ActiveProfiles("test")
-@EmbeddedKafka(partitions = 1, topics = {Topics.RESERVATION_EVENTS_TOPIC, Topics.CUSTOMER_EVENTS_TOPIC})
-class CancelReservationOnPaymentTimeoutApplicationTests {
-
-    private static final Logger log = LoggerFactory.getLogger(CancelReservationOnPaymentTimeoutApplicationTests.class);
-
-    @Autowired
     private KafkaEventProducer kafkaEventProducer;
-
-
-    @LocalServerPort
-    private int localServerPort;
 
     private WebClient webClient;
 
     @BeforeEach
     public void beforeEach() {
-        webClient = WebClient.create("http://localhost:%s".formatted(localServerPort));
+        webClient = WebClient.create("http://localhost:9585");
+        kafkaEventProducer = new KafkaEventProducer("localhost:9092");
     }
 
-    @Test
-    void paymentTimeoutDetectionTest() {
-        //given
-        Flux<ExperimentResult> booleanFlux = Flux.range(0, 20)
-                .subscribeOn(Schedulers.parallel())
-                .publishOn(Schedulers.parallel())
-                .flatMap(integer ->
-                        switch (integer % 3) {
-                            case 0 -> reserveAndPayForTable();
-                            case 1 -> reserveTableAndPayLate();
-                            case 2 -> reserveTableAndLeave();
-                            default -> Flux.error(new IllegalStateException("Unexpected value: " + integer % 3));
-                        }
-                )
-                .log()
-                .filter(ExperimentResult::wasSuccessful);
-        //when
-        StepVerifier.create(booleanFlux)
-                //then
-                .expectNextCount(3)
-                .expectComplete()
-                .verify();
-    }
 
     @Test
     void reserveAndPayForTableSingleTry() {

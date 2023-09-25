@@ -47,24 +47,26 @@ public class KStreamAndKTableDefinitions {
         this.kafkaEventProducer = kafkaEventProducer;
     }
 
-    private static TableReservation aggregation(String key, Event event, TableReservation aggregate) {
-        return switch (event) {
+    private static TableReservation aggregation(String key, Event event, TableReservation currentTableReservation) {
+        TableReservation newTableReservation = switch (event) {
             case CustomerRequestedTable customerRequestedTable ->
-                    aggregate.withTableId(customerRequestedTable.tableId()).awaitPayment(key);
+                    currentTableReservation.withTableId(customerRequestedTable.tableId()).awaitPayment(key);
             case CustomerPaidForTable customerPaidForTable -> {
                 try {
-                    if (customerPaidForTable.tableId().equals(aggregate.getTableId())){
-                        yield aggregate.paidFor();
+                    if (customerPaidForTable.tableId().equals(currentTableReservation.getTableId())) {
+                        yield currentTableReservation.paidFor();
                     } else {
-                      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "does not support parallel reservation per customer yet");
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "does not support parallel reservation per customer yet");
                     }
                 } catch (Exception e) {
-//                    log.error("error when setting the table paid for {}", aggregate, e);
-                    yield null;
+                    log.error("error when setting the table paid for {}", currentTableReservation, e);
+                    yield TableReservation.createTableReservation();
                 }
             }
-            default -> TableReservation.createTable();
+            default -> TableReservation.createTableReservation();
         };
+        log.info("BMD:: \n event {} -- current {} -- \n next {} ", event, currentTableReservation, newTableReservation);
+        return newTableReservation;
     }
 
     @PostConstruct
@@ -73,18 +75,19 @@ public class KStreamAndKTableDefinitions {
         streamsBuilder.stream(Topics.CUSTOMER_EVENTS_TOPIC, EVENT_CONSUMED)
                 .groupByKey(Grouped.with(Serdes.String(), EVENT_JSON_SERDE))
                 .windowedBy(timeWindows)
-                .aggregate(TableReservation::createTable, KStreamAndKTableDefinitions::aggregation, RESERVATION_LOCAL_KTABLE_MATERIALIZED)
+                .aggregate(TableReservation::createTableReservation, KStreamAndKTableDefinitions::aggregation, RESERVATION_LOCAL_KTABLE_MATERIALIZED)
                 .suppress(Suppressed.untilWindowCloses(new StrictBufferConfigImpl()))
                 .toStream()
-                .peek((key, tableReservation) -> {
+                .foreach((key, tableReservation) -> {
+                    log.info("BMD:: \n final {} ", tableReservation);
                     // we can produce events into other topic to update the actual state machine of orders
                     if (tableReservation != null && tableReservation.isPaidFor()) {
                         log.info("{} is reserved for {}", tableReservation.getTableId(), tableReservation.getCustomerId());
                     } else if (tableReservation == null || tableReservation.getTableId() == null) {
                         //not sure if this branch ever happens
-                        log.warn("late payment done by {}", key);
+                        log.error("late payment done by {}", key);
                     } else {
-                        log.warn("reservation of table {} failed for customer {} due to no payment", tableReservation.getTableId(), tableReservation.getCustomerId());
+                        log.error("reservation of table {} failed for customer {} due to no payment", tableReservation.getTableId(), tableReservation.getCustomerId());
                     }
                     LocalTime startTime = ZonedDateTime.ofInstant(key.window().startTime(), ZoneId.systemDefault()).toLocalTime();
                     LocalTime endTime = ZonedDateTime.ofInstant(key.window().endTime(), ZoneId.systemDefault()).toLocalTime();
