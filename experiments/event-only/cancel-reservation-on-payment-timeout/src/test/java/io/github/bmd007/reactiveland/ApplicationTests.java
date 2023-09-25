@@ -114,7 +114,6 @@ class ApplicationTests {
     private Mono<ExperimentResult> reserveAndPayForTable() {
         String customerId = UUID.randomUUID().toString();
         long delay = 5L;
-
         return requestTable(customerId, TABLE_ID)
                 .delayElement(Duration.ofSeconds(delay))
                 .flatMap(ignored -> payForTable(customerId, TABLE_ID))
@@ -136,7 +135,6 @@ class ApplicationTests {
     private Mono<ExperimentResult> reserveTableAndLeave() {
         String customerId = UUID.randomUUID().toString();
         long delay = 22L;
-
         return requestTable(customerId, TABLE_ID)
                 .delayElement(Duration.ofSeconds(delay))
                 .flatMap(ignored -> fetchReservationStatus(customerId))
@@ -147,11 +145,10 @@ class ApplicationTests {
     private Mono<ExperimentResult> reserveTableAndPayLate() {
         String customerId = UUID.randomUUID().toString();
         long delay = 20L;
-
         return requestTable(customerId, TABLE_ID)
                 .delayElement(Duration.ofSeconds(delay))
                 .flatMap(ignored -> payForTable(customerId, TABLE_ID))
-                .delayElement(Duration.ofSeconds(1))
+                .delayElement(Duration.ofSeconds(2))
                 .flatMap(ignored -> fetchReservationStatus(customerId))
                 .map(status -> new ExperimentResult(customerId, status, "reserveTableAndPayLate"));
     }

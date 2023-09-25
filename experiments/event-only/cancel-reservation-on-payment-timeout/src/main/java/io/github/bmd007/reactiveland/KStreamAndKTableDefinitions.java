@@ -57,7 +57,6 @@ public class KStreamAndKTableDefinitions {
                 yield null;
             }
             case CustomerPaidForTable customerPaidForTable -> {
-                log.info("BMD:: \n event {} -- current {} -- \n", event, currentTableReservation);
                 try {
                     if (currentTableReservation.getTableId() == null) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "table id is null");
