@@ -27,7 +27,6 @@ class AcceptanceTests {
         kafkaEventProducer = new KafkaEventProducer("localhost:9092");
     }
 
-
     @Test
     void reserveAndPayForTableSingleTry() {
         //given

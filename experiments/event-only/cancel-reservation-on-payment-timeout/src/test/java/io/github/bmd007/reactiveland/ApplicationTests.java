@@ -29,9 +29,9 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
 @EmbeddedKafka(partitions = 1, topics = {Topics.RESERVATION_EVENTS_TOPIC, Topics.CUSTOMER_EVENTS_TOPIC})
-class CancelReservationOnPaymentTimeoutApplicationTests {
+class ApplicationTests {
 
-    private static final Logger log = LoggerFactory.getLogger(CancelReservationOnPaymentTimeoutApplicationTests.class);
+    private static final Logger log = LoggerFactory.getLogger(ApplicationTests.class);
 
     @Autowired
     private KafkaEventProducer kafkaEventProducer;
