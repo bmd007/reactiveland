@@ -31,6 +31,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @EmbeddedKafka(partitions = 1, topics = {Topics.RESERVATION_EVENTS_TOPIC, Topics.CUSTOMER_EVENTS_TOPIC})
 class ApplicationTests {
 
+    private final static String TABLE_ID = "table__Id";
     private static final Logger log = LoggerFactory.getLogger(ApplicationTests.class);
 
     @Autowired
@@ -113,10 +114,10 @@ class ApplicationTests {
     private Mono<ExperimentResult> reserveAndPayForTable() {
         String customerId = UUID.randomUUID().toString();
         long delay = 5L;
-        String tableId = "UUID.randomUUID().toString()";
-        return requestTable(customerId, tableId)
+
+        return requestTable(customerId, TABLE_ID)
                 .delayElement(Duration.ofSeconds(delay))
-                .flatMap(ignored -> payForTable(customerId, tableId))
+                .flatMap(ignored -> payForTable(customerId, TABLE_ID))
                 .delayElement(Duration.ofSeconds(2))
                 .flatMap(ignored -> fetchReservationStatus(customerId))
                 .onErrorResume(WebClientResponseException.class, exception -> Mono.just(exception.getStatusCode().toString()))
@@ -135,8 +136,8 @@ class ApplicationTests {
     private Mono<ExperimentResult> reserveTableAndLeave() {
         String customerId = UUID.randomUUID().toString();
         long delay = 22L;
-        String tableId = "UUID.randomUUID().toString()";
-        return requestTable(customerId, tableId)
+
+        return requestTable(customerId, TABLE_ID)
                 .delayElement(Duration.ofSeconds(delay))
                 .flatMap(ignored -> fetchReservationStatus(customerId))
                 .onErrorResume(WebClientResponseException.class, exception -> Mono.just(exception.getStatusCode().toString()))
@@ -146,22 +147,22 @@ class ApplicationTests {
     private Mono<ExperimentResult> reserveTableAndPayLate() {
         String customerId = UUID.randomUUID().toString();
         long delay = 20L;
-        String tableId = "UUID.randomUUID().toString()";
-        return requestTable(customerId, tableId)
+
+        return requestTable(customerId, TABLE_ID)
                 .delayElement(Duration.ofSeconds(delay))
-                .flatMap(ignored -> payForTable(customerId, tableId))
+                .flatMap(ignored -> payForTable(customerId, TABLE_ID))
                 .delayElement(Duration.ofSeconds(1))
                 .flatMap(ignored -> fetchReservationStatus(customerId))
                 .map(status -> new ExperimentResult(customerId, status, "reserveTableAndPayLate"));
     }
 
-    private Mono<RecordMetadata> requestTable(String customerId, String tableId) {
-        var event = new Event.CustomerEvent.CustomerRequestedTable(customerId, tableId);
+    private Mono<RecordMetadata> requestTable(String customerId, String TABLE_ID) {
+        var event = new Event.CustomerEvent.CustomerRequestedTable(customerId, TABLE_ID);
         return kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC);
     }
 
-    private Mono<RecordMetadata> payForTable(String customerId, String tableId) {
-        var event = new Event.CustomerEvent.CustomerPaidForTable(customerId, tableId);
+    private Mono<RecordMetadata> payForTable(String customerId, String TABLE_ID) {
+        var event = new Event.CustomerEvent.CustomerPaidForTable(customerId, TABLE_ID);
         return kafkaEventProducer.produceEvent(event, Topics.CUSTOMER_EVENTS_TOPIC);
     }
 

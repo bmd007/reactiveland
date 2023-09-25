@@ -48,7 +48,7 @@ public class KStreamAndKTableDefinitions {
     }
 
     private static TableReservation aggregation(String key, Event event, TableReservation currentTableReservation) {
-        TableReservation newTableReservation = switch (event) {
+        return switch (event) {
             case CustomerRequestedTable customerRequestedTable -> {
                 if (currentTableReservation.getTableId() == null) {
                     yield currentTableReservation.withTableId(customerRequestedTable.tableId()).awaitPayment(key);
@@ -57,6 +57,7 @@ public class KStreamAndKTableDefinitions {
                 yield null;
             }
             case CustomerPaidForTable customerPaidForTable -> {
+                log.info("BMD:: \n event {} -- current {} -- \n", event, currentTableReservation);
                 try {
                     if (currentTableReservation.getTableId() == null) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "table id is null");
@@ -71,8 +72,6 @@ public class KStreamAndKTableDefinitions {
             }
             default -> null;
         };
-        log.info("BMD:: \n event {} -- current {} -- \n next {} ", event, currentTableReservation, newTableReservation);
-        return newTableReservation;
     }
 
     @PostConstruct
