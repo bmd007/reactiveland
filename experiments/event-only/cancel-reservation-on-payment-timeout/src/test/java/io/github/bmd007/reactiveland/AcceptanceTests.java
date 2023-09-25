@@ -17,7 +17,7 @@ import java.util.UUID;
 
 class AcceptanceTests {
 
-    private final static String TABLE_ID = "table__Id";
+    private final static String TABLE_ID = "tableId";
     private KafkaEventProducer kafkaEventProducer;
 
     private WebClient webClient;

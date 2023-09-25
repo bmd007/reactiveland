@@ -61,7 +61,7 @@ public class KStreamAndKTableDefinitions {
                 try {
                     if (currentTableReservation.getTableId() == null) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "table id is null");
-                    } else if (currentTableReservation.getTableId().equals(customerPaidForTable.customerId())) {
+                    } else if (currentTableReservation.getTableId().equals(customerPaidForTable.tableId())) {
                         yield currentTableReservation.paidFor();
                     }
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "does not support parallel reservation per customer yet");

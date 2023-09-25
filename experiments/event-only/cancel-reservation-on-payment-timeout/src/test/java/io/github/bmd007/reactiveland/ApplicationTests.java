@@ -31,7 +31,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @EmbeddedKafka(partitions = 1, topics = {Topics.RESERVATION_EVENTS_TOPIC, Topics.CUSTOMER_EVENTS_TOPIC})
 class ApplicationTests {
 
-    private final static String TABLE_ID = "table__Id";
+    private final static String TABLE_ID = "tableId";
     private static final Logger log = LoggerFactory.getLogger(ApplicationTests.class);
 
     @Autowired
