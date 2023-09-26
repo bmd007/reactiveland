@@ -14,7 +14,9 @@ import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Suppressed;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.apache.kafka.streams.kstream.internals.suppress.StrictBufferConfigImpl;
 import org.apache.kafka.streams.state.WindowStore;
 import org.springframework.context.annotation.Configuration;
 
@@ -42,7 +44,7 @@ public class KStreamAndKTableDefinitions {
         this.kafkaEventProducer = kafkaEventProducer;
     }
 
-    private static TableReservation aggregation(String key, Event event, TableReservation currentTableReservation) {
+    private TableReservation aggregation(String key, Event event, TableReservation currentTableReservation) {
         return switch (event) {
             case CustomerRequestedTable customerRequestedTable -> {
                 if (currentTableReservation.getTableId() == null) {
@@ -56,21 +58,23 @@ public class KStreamAndKTableDefinitions {
                     yield currentTableReservation.paidFor();
                 } catch (Exception e) {
                     log.error("error when setting the table reservation {} status to paid for", currentTableReservation, e);
-                    yield null;
+                    yield currentTableReservation;
                 }
             }
-            default -> null;
+            default -> currentTableReservation;
         };
     }
 
     @PostConstruct
     public void configureStores() {
+        var suppressedConfig = new StrictBufferConfigImpl().withMaxRecords(2).emitEarlyWhenFull();
         TimeWindows timeWindows = TimeWindows.ofSizeAndGrace(Duration.ofSeconds(15), Duration.ofSeconds(1));
         streamsBuilder.stream(Topics.CUSTOMER_EVENTS_TOPIC, EVENT_CONSUMED)
                 .groupByKey(Grouped.with(Serdes.String(), EVENT_JSON_SERDE))
                 .windowedBy(timeWindows)
-                .aggregate(TableReservation::createTableReservation, KStreamAndKTableDefinitions::aggregation, RESERVATION_LOCAL_KTABLE_MATERIALIZED)
-//                .suppress(Suppressed.untilWindowCloses(new StrictBufferConfigImpl()))
+                .aggregate(TableReservation::createTableReservation, this::aggregation, RESERVATION_LOCAL_KTABLE_MATERIALIZED)
+//                .suppress(Suppressed.untilWindowCloses(suppressedConfig))
+                .suppress(Suppressed.untilTimeLimit(Duration.ofSeconds(15), suppressedConfig))
                 .toStream()
                 .foreach((key, tableReservation) -> {
                     log.info("BMD:: \n final {} ", tableReservation);
