@@ -87,4 +87,42 @@ public class KStreamAndKTableDefinitions {
                     log.info("window length {}:{}", startTime, endTime);
                 });
     }
+
+    //**
+    // // Define a TimeWindows window with a size of 10 seconds and a grace period of 5 seconds
+    //TimeWindows window = TimeWindows.of(Duration.ofSeconds(10)).grace(Duration.ofSeconds(5));
+    //
+    //// Join the request stream with the response stream using the leftJoin method
+    //KStream<String, Event> events = requests.leftJoin(
+    //responses,
+    //(request, response) -> new Event(request, response), // join function
+    //window,
+    //Joined.with(Serdes.String(), new RequestSerde(), new ResponseSerde()) // serdes for key and value
+    //);
+    //
+    //// Transform the joined record into an event based on the presence or absence of the response value
+    //events = events.mapValues((key, event) -> {
+    //if (event.getResponse() == null) {
+    //// No response was found within the time window, emit a timeout event
+    //event.setType("timeout");
+    //event.setMessage("No response received for request " + event.getRequest().getRequestId());
+    //} else {
+    //// A response was found within the time window, check if it was before or after the window end
+    //long requestTime = event.getRequest().getTimestamp();
+    //long responseTime = event.getResponse().getTimestamp();
+    //long windowEnd = requestTime + window.sizeMs();
+    //if (responseTime <= windowEnd) {
+    //// The response was received before the window end, emit a success event
+    //event.setType("success");
+    //event.setMessage("Response received for request " + event.getRequest().getRequestId());
+    //} else {
+    //// The response was received after the window end, emit an expiry event
+    //event.setType("expiry");
+    //event.setMessage("Response received too late for request " + event.getRequest().getRequestId());
+    //}
+    //}
+    //return event;
+    //});
+    //
+    // *//
 }
