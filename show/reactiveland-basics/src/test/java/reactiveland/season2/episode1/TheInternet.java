@@ -98,7 +98,6 @@ class TheInternet {
                 )
                 .reduce((s, s2) -> s.concat(" ").concat(s2))
                 .log();
-
         StepVerifier.create(randomSentenceMono)
                 .expectNext(" wrong ")
                 .expectComplete()

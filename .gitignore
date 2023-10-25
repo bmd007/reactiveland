@@ -35,5 +35,5 @@ out/
 
 ### VS Code ###
 .vscode/
-/experiments/load-test-experiment/deployment/metrics/prometheus_db/
-/experiments/load-test-experiment/deployment/metrics/grafana_db/
+/experiment/load-test-experiment/deployment/metrics/prometheus_db/
+/experiment/load-test-experiment/deployment/metrics/grafana_db/
