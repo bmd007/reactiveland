@@ -22,6 +22,7 @@ Our journey will happen through a series of short lecture (Youtube) followed by 
   of [Webflux](https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html)
 - Josh Long book: [reactive-spring](https://leanpub.com/reactive-spring)
 - watch [video from spring](https://youtu.be/IZ2SoXUiS7M)
+- [Functors, category theory and Java](https://dzone.com/articles/functor-and-monad-examples-in-plain-java)
 
 ### What
 
