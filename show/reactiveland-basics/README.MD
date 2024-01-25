@@ -91,7 +91,7 @@
 ##### [Lecture video](https://youtu.be/cUqjEzZRO2o)
 
 ##### [Challenge 1 video](https://youtu.be/5osIQsdjS0E)
-
+ 
 ##### [Challenge 2 video](https://youtu.be/FpAeEJIDW-g)
 
 ### Episode 5: [Reactive Application](show/reactiveland-basics/src/test/java/reactiveland/season2/episode5)
