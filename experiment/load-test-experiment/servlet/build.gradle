@@ -44,7 +44,7 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'com.nimbusds:nimbus-jose-jwt:9.37.1'
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.37.3'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
