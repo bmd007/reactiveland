@@ -42,7 +42,7 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
     implementation 'org.springframework.boot:spring-boot-starter-rsocket'
-    implementation 'com.nimbusds:nimbus-jose-jwt:9.39.3'
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.40'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
