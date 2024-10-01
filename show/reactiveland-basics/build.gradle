@@ -26,9 +26,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.cloud:spring-cloud-starter'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-    implementation 'com.google.guava:guava:33.3.0-jre'
+    implementation 'com.google.guava:guava:33.3.1-jre'
     implementation 'io.projectreactor.addons:reactor-extra:3.5.2'
-    annotationProcessor 'org.jetbrains:annotations:24.1.0'
+    annotationProcessor 'org.jetbrains:annotations:25.0.0'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
@@ -38,8 +38,8 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
-    testImplementation "org.testcontainers:junit-jupiter:1.20.1"
-    testImplementation "org.testcontainers:postgresql:1.20.1"
+    testImplementation "org.testcontainers:junit-jupiter:1.20.2"
+    testImplementation "org.testcontainers:postgresql:1.20.2"
 }
 
 dependencyManagement {
