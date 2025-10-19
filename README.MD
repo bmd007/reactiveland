@@ -45,5 +45,3 @@ In this repo we have recordings of interactive educational shows, experiments an
   and use the current state of the master branch to verify your solutions.
 
 #### [Reactiveland basics](show%2Freactiveland-basics%2FREADME.MD)
-
-#### [Reactiveland reboot](show%2Freactiveland-reboot%2FREADME.MD)
